@@ -1,26 +1,26 @@
 """
-Agente Indexador.
-Responsable de la ingestión, limpieza, chunking e indexación de documentos.
+Agente Indexador - STUB.
+
+PENDIENTE DE IMPLEMENTACIÓN (Persona 2/3).
+
+Responsable de:
+- Cargar documentos de múltiples formatos (PDF, HTML, TXT)
+- Limpiar y normalizar texto
+- Chunkear documentos con overlap
+- Indexar en FAISS con embeddings
 """
 import logging
-from typing import List, Dict, Any, Optional
-from pathlib import Path
-
-from src.tools import PDFLoaderTool, HTMLLoaderTool, TextCleanerTool
-from src.rag_pipeline import RAGPipeline
+from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
 
 class IndexerAgent:
     """
-    Agente de Indexación.
+    Agente de Indexación - PENDIENTE DE IMPLEMENTACIÓN.
     
-    Responsable de:
-    - Cargar documentos de múltiples formatos
-    - Limpiar y normalizar texto
-    - Chunkear documentos
-    - Indexar en FAISS con embeddings
+    Este agente será implementado por Persona 2/3.
+    Responsable del pipeline completo de indexación.
     """
     
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
@@ -28,11 +28,12 @@ class IndexerAgent:
         Inicializa el agente indexador.
         
         Args:
-            chunk_size: Tamaño de chunks
-            chunk_overlap: Overlap entre chunks
+            chunk_size: Tamaño de chunks (default: 1000)
+            chunk_overlap: Overlap entre chunks (default: 200)
         """
-        self.pipeline = RAGPipeline(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        logger.info("IndexerAgent inicializado")
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        logger.info("IndexerAgent - PENDIENTE DE IMPLEMENTACIÓN (Persona 2/3)")
     
     def index_directory(self, directory_path: str, 
                        file_types: List[str] = None,
@@ -40,74 +41,79 @@ class IndexerAgent:
         """
         Indexa todos los documentos de un directorio.
         
+        TODO (Persona 2/3):
+        - Escanear directorio por tipos de archivo
+        - Cargar documentos con PDFLoaderTool, HTMLLoaderTool
+        - Limpiar texto con TextCleanerTool
+        - Chunkear con DocumentChunker
+        - Generar embeddings con EmbeddingsManager
+        - Indexar en FAISS con VectorStoreManager
+        - Guardar índice persistente
+        
         Args:
             directory_path: Ruta del directorio
-            file_types: Tipos de archivo a procesar
-            clean_aggressive: Limpieza agresiva
+            file_types: Tipos de archivo a procesar ['pdf', 'html', 'txt']
+            clean_aggressive: Si aplicar limpieza agresiva
             
         Returns:
-            Estadísticas del proceso
+            Estadísticas del proceso (documentos, chunks, etc.)
         """
-        logger.info(f"Iniciando indexación de: {directory_path}")
-        
-        stats = self.pipeline.index_directory(
-            directory_path=directory_path,
-            file_types=file_types or ['pdf', 'html', 'txt'],
-            clean_aggressive=clean_aggressive,
-            save_index=True
-        )
-        
-        logger.info(f"Indexación completada: {stats}")
-        return stats
+        logger.warning(f"IndexerAgent.index_directory() - PENDIENTE DE IMPLEMENTACIÓN")
+        return {
+            "total_documents": 0,
+            "total_chunks": 0,
+            "directory": directory_path
+        }
     
     def load_existing_index(self):
-        """Carga un índice existente."""
-        logger.info("Cargando índice existente...")
-        self.pipeline.load_existing_index()
-        logger.info("Índice cargado exitosamente")
+        """
+        Carga un índice FAISS existente desde disco.
+        
+        TODO (Persona 2/3):
+        - Cargar índice FAISS desde data/vector_store/
+        - Cargar metadatos de documentos
+        - Validar integridad del índice
+        """
+        logger.warning("IndexerAgent.load_existing_index() - PENDIENTE DE IMPLEMENTACIÓN")
     
     def get_index_stats(self) -> Dict[str, Any]:
-        """Obtiene estadísticas del índice."""
-        return self.pipeline.get_stats()
+        """
+        Obtiene estadísticas del índice actual.
+        
+        TODO (Persona 2/3):
+        - Número total de chunks indexados
+        - Número de documentos fuente
+        - Dimensión de embeddings
+        - Tamaño del índice en disco
+        
+        Returns:
+            Estadísticas del índice
+        """
+        logger.warning("IndexerAgent.get_index_stats() - PENDIENTE DE IMPLEMENTACIÓN")
+        return {
+            "total_chunks": 0,
+            "total_documents": 0,
+            "embedding_dim": 0
+        }
     
     def add_documents(self, file_paths: List[str]) -> Dict[str, Any]:
         """
         Añade documentos adicionales al índice existente.
         
+        TODO (Persona 2/3):
+        - Cargar y procesar nuevos documentos
+        - Generar embeddings
+        - Actualizar índice FAISS incremental
+        - Guardar cambios
+        
         Args:
-            file_paths: Lista de rutas de archivos
+            file_paths: Lista de rutas de archivos a añadir
             
         Returns:
             Estadísticas de la adición
         """
-        logger.info(f"Añadiendo {len(file_paths)} documentos al índice...")
-        
-        # Cargar documentos
-        documents = []
-        for file_path in file_paths:
-            path = Path(file_path)
-            
-            if path.suffix == '.pdf':
-                docs = PDFLoaderTool.load_pdf(str(path))
-                documents.extend(docs)
-            elif path.suffix in ['.html', '.htm']:
-                docs = HTMLLoaderTool.load_html(str(path))
-                documents.extend(docs)
-            elif path.suffix == '.txt':
-                with open(path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                doc = {
-                    'content': content,
-                    'metadata': {
-                        'source': str(path),
-                        'file_name': path.name,
-                        'file_type': 'txt'
-                    }
-                }
-                documents.append(doc)
-        
-        # Procesar y añadir
-        stats = self.pipeline.process_and_index(documents, save_index=True)
-        
-        logger.info(f"Documentos añadidos: {stats}")
-        return stats
+        logger.warning(f"IndexerAgent.add_documents() - PENDIENTE DE IMPLEMENTACIÓN")
+        return {
+            "added_documents": 0,
+            "added_chunks": 0
+        }
