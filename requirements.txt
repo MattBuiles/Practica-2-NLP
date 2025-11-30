@@ -1,0 +1,35 @@
+# Core LangChain
+langchain==1.1.0          # latest release (Nov 24, 2025) :contentReference[oaicite:0]{index=0}
+langchain-core==1.1.0     # core interfaces de LangChain :contentReference[oaicite:1]{index=1}
+langchain-community       # deja sin versión para tomar la más reciente disponible
+
+# LLM Providers / Integraciones
+langchain-google-genai==3.2.0   # integración con Google Gemini — última versión (Nov 24, 2025) :contentReference[oaicite:2]{index=2}
+langchain-groq==1.1.0           # integración Groq — versión alineada con LangChain 1.1.0 :contentReference[oaicite:3]{index=3}
+
+# Embeddings
+sentence-transformers==5.1.2    # última versión (Oct 22, 2025) :contentReference[oaicite:4]{index=4}
+# Nota: sentence-transformers depende de torch / transformers; asegúrate de instalar también la versión compatible de torch si usas GPU.
+
+# Vector Store
+faiss-cpu    # puedes dejar sin versión fija o fijar según compatibilidad local
+
+# Document Loaders / Parsing
+pypdf==6.4.0                # versión reciente para manejo de PDFs (Nov 23, 2025) :contentReference[oaicite:5]{index=5}
+beautifulsoup4              # deja sin versión para tomar la más reciente
+lxml                        # deja sin versión
+unstructured==0.18.21       # procesamiento de documentos no estructurados (PDF, HTML, DOCX...) :contentReference[oaicite:6]{index=6}
+
+# Text Processing
+python-dotenv               # deja sin versión
+PyYAML                      # deja sin versión
+
+# LLM / AI providers
+google-generativeai         # deja sin versión (tomará la versión más reciente disponible en PyPI)
+
+# Optional: Jupyter para experimentos
+jupyter                     # deja sin versión
+notebook                    # deja sin versión
+
+# Optional: Visualización
+matplotlib                  # deja sin versión

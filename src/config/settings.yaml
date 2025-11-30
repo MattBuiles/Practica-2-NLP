@@ -1,0 +1,62 @@
+# Configuración general del sistema Agentic AI
+
+# Configuración de embeddings
+embeddings:
+  model: "sentence-transformers/all-MiniLM-L6-v2"
+  chunk_size: 1000
+  chunk_overlap: 200
+
+# Configuración de FAISS
+faiss:
+  index_type: "L2"  # L2 distance (Euclidean)
+  similarity_metric: "cosine"
+  top_k: 5  # Número de documentos a recuperar
+
+# Configuración de agentes
+agents:
+  classifier:
+    intent_categories:
+      - "busqueda"      # Búsqueda de información/consumo
+      - "resumen"       # Resumen de documentos
+      - "comparacion"   # Comparación de documentos
+      - "general"       # Consulta general (sin RAG)
+  
+  retriever:
+    max_documents: 10
+    min_similarity: 0.5
+  
+  rag:
+    max_response_length: 2000
+    include_citations: true
+  
+  critic:
+    max_regeneration_attempts: 2
+    validation_criteria:
+      - coherence
+      - context_alignment
+      - no_hallucinations
+      - completeness
+
+# Configuración de trazabilidad
+tracing:
+  enabled: true
+  log_level: "INFO"
+  save_to_file: true
+  include_timestamps: true
+  include_llm_calls: true
+
+# Configuración de dominio
+domain:
+  name: "salud"  # Cambiar según el dominio elegido
+  description: "Documentos relacionados con salud, medicina y bienestar"
+  min_documents: 100
+
+# Configuración de procesamiento
+processing:
+  supported_formats:
+    - "pdf"
+    - "txt"
+    - "html"
+  max_file_size_mb: 50
+  parallel_processing: true
+  num_workers: 4
