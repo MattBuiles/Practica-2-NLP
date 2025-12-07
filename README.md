@@ -11,14 +11,23 @@
 - ✅ Sistema de Trazabilidad
 - ✅ Configuración LLM con justificación
 
-### 🟡 Persona 2/3: Recuperación, Generación y Validación (PENDIENTE)
+### ✅ Persona 3: Recuperación, Generación y Validación (IMPLEMENTADO)
+
+**Componentes Completados:**
+- ✅ RetrieverAgent (Optimización + FAISS)
+- ✅ RAGAgent (Prompts especializados + Generación)
+- ✅ CriticAgent (Validación multi-criterio + Regeneración)
+- ✅ Ciclo de realimentación completo
+- ✅ Documentación técnica exhaustiva
+
+### 🟡 Persona 2: Ingestión y Vector Store (PENDIENTE)
 
 **Componentes como Stubs:**
-- 🟡 RetrieverAgent
-- 🟡 RAGAgent  
-- 🟡 CriticAgent
-- 🟡 RAG Pipeline (embeddings, chunking, FAISS)
+- 🟡 VectorStoreManager (FAISS)
+- 🟡 EmbeddingsManager
+- 🟡 RAG Pipeline (embeddings, chunking)
 - 🟡 Tools (loaders, cleaners)
+- 🟡 IndexerAgent
 
 ## 🎯 Funcionalidad Actual (Persona 1)
 
@@ -77,21 +86,24 @@ Usuario
 └──────────────────────┘
    ↓
 ┌──────────────────────┐
-│ 2. Retriever         │ 🟡 PENDIENTE (Persona 2/3)
+│ 2. Retriever         │ ✅ IMPLEMENTADO (Persona 3)
 │    - Groq Llama      │
 │    - FAISS Search    │
+│    - Optimización    │
 └──────────────────────┘
    ↓
 ┌──────────────────────┐
-│ 3. RAG Agent         │ 🟡 PENDIENTE (Persona 2/3)
+│ 3. RAG Agent         │ ✅ IMPLEMENTADO (Persona 3)
 │    - Groq Llama      │
 │    - Generación      │
+│    - Prompts         │
 └──────────────────────┘
    ↓
 ┌──────────────────────┐
-│ 4. Critic Agent      │ 🟡 PENDIENTE (Persona 2/3)
-│    - Gemini 1.5      │
+│ 4. Critic Agent      │ ✅ IMPLEMENTADO (Persona 3)
+│    - Gemini 2.5      │
 │    - Validación      │
+│    - Regeneración    │
 └──────────────────────┘
    ↓
 Respuesta Final

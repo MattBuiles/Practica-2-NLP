@@ -38,63 +38,147 @@ Query → Classify → Route → Retrieve → Generate → Validate → Response
 
 **Temperatura**: 0.1 (clasificación consistente)
 
-### 3. Agente Recuperador (`retriever_agent.py`)
+### 3. Agente Recuperador (`retriever_agent.py`) - IMPLEMENTADO (Persona 3)
+
+**Estado**: Completamente implementado
 
 **LLM**: Groq (Llama 3.1 70B)
 
 **Justificación**: Latencia mínima para optimización rápida de consultas
 
 **Responsabilidades**:
-- Optimizar consultas para mejor recuperación
-- Búsqueda semántica en FAISS
-- Rankear y filtrar resultados
+- Optimizar consultas para mejor recuperación usando LLM
+- Búsqueda semántica en FAISS (asume vectorstore implementado)
+- Rankear y filtrar resultados por score threshold
 - Adaptar recuperación según intención
 
 **Temperatura**: 0.2
 
-**Métodos especializados**:
-- `retrieve_for_comparison()`: Para comparaciones
-- `retrieve_for_summary()`: Para resúmenes
+**Métodos implementados**:
+- `retrieve()`: Recuperación estándar con optimización opcional
+- `retrieve_for_comparison()`: Recupera 4-6 docs con threshold bajo (0.3)
+- `retrieve_for_summary()`: Recupera 8-10 docs con threshold moderado (0.4)
+- `_optimize_query()`: Reformula query con LLM para mejor recuperación
+- `_rank_and_filter()`: Filtra por score y ordena por relevancia
 
-### 4. Agente RAG (`rag_agent.py`)
+**Optimización de queries**:
+- Expande con sinónimos y términos relacionados
+- Elimina ambigüedades
+- Extrae keywords principales
+- Adapta estrategia según intención
+
+**Documentación**: Ver `docs/PERSONA_3_DOCUMENTATION.md`
+
+### 4. Agente RAG (`rag_agent.py`) - IMPLEMENTADO (Persona 3)
+
+**Estado**: Completamente implementado
 
 **LLM**: Groq (Llama 3.1 70B)
 
 **Justificación**: Velocidad de generación con baja latencia
 
 **Responsabilidades**:
-- Generar respuestas basadas en contexto
-- Incluir citas de fuentes
+- Generar respuestas basadas en contexto recuperado
+- Incluir citas obligatorias [Fuente X]
 - Adaptar estilo según intención
-- Respuestas generales (sin RAG)
+- Respuestas generales sin RAG para consultas conversacionales
 
-**Temperatura**: 0.3 (balance creatividad/precisión)
+**Temperatura**: 0.3 (RAG), 0.5 (General)
 
-**Prompts especializados**:
-- Búsqueda: Respuestas precisas con citas
-- Resumen: Extracción de puntos clave
-- Comparación: Análisis contrastivo
+**Prompts especializados implementados**:
 
-### 5. Agente Crítico (`critic_agent.py`)
+1. **Búsqueda**: 
+   - Respuestas precisas y concisas
+   - Citas explícitas para cada afirmación
+   - Instrucciones para no inventar información
+   - Formato: "Afirmación [Fuente X]"
+
+2. **Resumen**: 
+   - Síntesis estructurada con viñetas
+   - Identificación de puntos clave
+   - Eliminación de redundancias
+   - Estructura: Intro → Puntos clave → Conclusión
+
+3. **Comparación**: 
+   - Análisis contrastivo punto por punto
+   - Similitudes Y diferencias
+   - Formato estructurado
+   - Evaluación objetiva sin sesgos
+
+**Métodos implementados**:
+- `generate_response()`: Generación con contexto (selecciona prompt según intent)
+- `generate_general_response()`: Respuestas sin RAG
+- `format_response_with_sources()`: Añade sección de fuentes
+- `_format_context()`: Formatea documentos para LLM
+- `_extract_sources()`: Extrae metadata de fuentes
+
+**Documentación completa de prompts**: Ver `docs/PERSONA_3_DOCUMENTATION.md`
+
+### 5. Agente Crítico (`critic_agent.py`) - IMPLEMENTADO (Persona 3)
+
+**Estado**: Completamente implementado con ciclo de regeneración
 
 **LLM**: Gemini 2.5 Flash
 
 **Justificación**: Razonamiento profundo para validación compleja
 
 **Responsabilidades**:
-- Validar coherencia
-- Detectar alucinaciones
-- Verificar alineación con contexto
-- Decidir regeneración (máx 2 intentos)
+- Validar coherencia estructural
+- Detectar alucinaciones (información inventada)
+- Verificar alineación con contexto fuente
+- Evaluar completitud y calidad de citas
+- Decidir regeneración automática (máx 2 intentos)
 
 **Temperatura**: 0.1 (evaluación estricta)
 
-**Criterios de validación**:
-1. Coherencia estructural
-2. Alineación con contexto
-3. Ausencia de alucinaciones
-4. Completitud de respuesta
-5. Calidad de citas
+**Sistema de validación multi-criterio**:
+
+1. **Coherencia (20%)**:
+   - Estructura lógica y fluidez
+   - Transiciones entre ideas
+   - Facilidad de comprensión
+
+2. **Alineación (30%)** - Peso más alto:
+   - Fidelidad al contexto proporcionado
+   - Uso correcto de información fuente
+   - Interpretaciones precisas
+   - Threshold crítico: 0.60
+
+3. **Alucinaciones (25%)** - Crítico:
+   - Ausencia de información inventada
+   - Todas las afirmaciones respaldadas
+   - Score alto = sin alucinaciones
+   - Threshold crítico: 0.70
+
+4. **Completitud (15%)**:
+   - Responde completamente la pregunta
+   - Cubre aspectos solicitados
+   - Nivel de detalle adecuado
+
+5. **Citas (10%)**:
+   - Presencia de [Fuente X]
+   - Calidad de referencias
+   - Cobertura de afirmaciones
+
+**Score global ponderado**:
+```
+score = coherence*0.20 + alignment*0.30 + hallucination*0.25 + 
+        completeness*0.15 + citation*0.10
+```
+
+**Thresholds de decisión**:
+- Score mínimo global: 0.65
+- Alucinaciones mínimo: 0.70 (crítico)
+- Alineación mínimo: 0.60 (crítico)
+
+**Ciclo de regeneración**:
+- Método `validate_with_regeneration()` implementado
+- Máximo 2 intentos de generación
+- Regeneración automática si score insuficiente
+- Selección de mejor respuesta si se alcanza máximo
+- Historial completo de todos los intentos
+
+**Documentación completa**: Ver `docs/PERSONA_3_DOCUMENTATION.md`
 
 ### 6. Agente Indexador (`indexer_agent.py`)
 
