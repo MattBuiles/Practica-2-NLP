@@ -138,9 +138,8 @@ Marca needs_regeneration=True si:
 FORMATO DE SALIDA:
 Proporciona scores numéricos (0-1) y justificaciones detalladas para cada criterio.
 Lista problemas específicos encontrados.
-Proporciona evaluación general y decisión de regeneración.
-
-Contexto de documentos fuente:
+Proporciona evaluación general y decisión de regeneración."""),
+            ("human", """Contexto de documentos fuente:
 {context}
 
 Pregunta del usuario:
@@ -149,7 +148,7 @@ Pregunta del usuario:
 Respuesta generada a evaluar:
 {response}
 
-Evalúa la respuesta de forma rigurosa y objetiva:"""),
+Evalúa la respuesta de forma rigurosa y objetiva."""),
         ])
     
     def _format_context_for_validation(self, context_docs: List[Dict[str, Any]]) -> str:

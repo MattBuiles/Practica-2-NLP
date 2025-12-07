@@ -34,7 +34,7 @@ class LLMConfig:
         Usa Gemini por su superior capacidad de interpretación contextual.
         """
         return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-lite",
             google_api_key=self.gemini_api_key,
             temperature=0.1,  # Baja temperatura para clasificación consistente
             max_tokens=500
@@ -70,7 +70,7 @@ class LLMConfig:
         Usa Gemini por su capacidad de razonamiento profundo.
         """
         return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-lite",
             google_api_key=self.gemini_api_key,
             temperature=0.1,
             max_tokens=1500
