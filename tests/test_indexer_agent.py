@@ -48,10 +48,11 @@ def test_indexer_agent():
         total = pdf_count + html_count + txt_count
         
         print(f"   ✅ Directorio encontrado: {RAW_DATA_DIR}")
-        print(f"   - PDFs: {pdf_count}")
-        print(f"   - HTMLs: {html_count}")
-        print(f"   - TXTs: {txt_count}")
-        print(f"   - Total: {total}")
+        print(f"   - PDFs: {pdf_count} archivos")
+        print(f"   - HTMLs: {html_count} archivos")
+        print(f"   - TXTs: {txt_count} archivos")
+        print(f"   - Total: {total} archivos")
+        print(f"   💡 Nota: Cada archivo puede generar múltiples documentos")
         has_corpus = total > 0
     
     # Test 3: Indexar directorio (si hay corpus)
@@ -71,9 +72,11 @@ def test_indexer_agent():
             print(f"   - Chunks generados: {stats.get('total_chunks', 0)}")
             
             file_counts = stats.get('file_counts', {})
-            print(f"   - PDFs: {file_counts.get('pdf', 0)}")
-            print(f"   - HTMLs: {file_counts.get('html', 0)}")
-            print(f"   - TXTs: {file_counts.get('txt', 0)}")
+            print(f"\n   📊 Documentos por tipo (generados de los archivos):")
+            print(f"   - PDFs: {file_counts.get('pdf', 0)} documentos")
+            print(f"   - HTMLs: {file_counts.get('html', 0)} documentos")
+            print(f"   - TXTs: {file_counts.get('txt', 0)} documentos")
+            print(f"   💡 Estos son documentos generados, no archivos originales")
             
             if stats.get('status') == 'success':
                 print(f"   ✅ Pipeline completo ejecutado exitosamente")
