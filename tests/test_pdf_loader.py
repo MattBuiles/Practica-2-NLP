@@ -23,7 +23,7 @@ def test_pdf_loader():
     RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
     
     # Test 1: Buscar archivos PDF
-    print("\n3. Buscando archivos PDF en data/raw/...")
+    print("\n1. Buscando archivos PDF en data/raw/...")
     pdf_files = list(RAW_DATA_DIR.glob("*.pdf"))
     print(f"   📁 Directorio: {RAW_DATA_DIR}")
     print(f"   📄 Archivos PDF encontrados: {len(pdf_files)}")
@@ -40,7 +40,7 @@ def test_pdf_loader():
     
     # Test 2: Cargar un PDF individual (si existe)
     if pdf_files:
-        print("\n4. Probando carga de PDF individual...")
+        print("\n2. Probando carga de PDF individual...")
         try:
             test_pdf = pdf_files[0]
             print(f"   📄 Probando con: {test_pdf.name}")
@@ -78,7 +78,7 @@ def test_pdf_loader():
     
     # Test 3: Cargar múltiples PDFs (si hay 2+)
     if len(pdf_files) >= 2:
-        print("\n5. Probando carga de múltiples PDFs...")
+        print("\n3. Probando carga de múltiples PDFs...")
         try:
             test_pdfs = [str(p) for p in pdf_files[:3]]  # Probar con máximo 3
             print(f"   📚 Cargando {len(test_pdfs)} archivos PDF...")
@@ -105,10 +105,10 @@ def test_pdf_loader():
         print("   ⚠️  OMITIDO - Se requieren al menos 2 archivos PDF")
     
     # Test 4: Manejo de errores
-    print("\n6. Probando manejo de errores...")
+    print("\n4. Probando manejo de errores...")
     
     # Test 4.1: Archivo no existe
-    print("   6.1. Archivo no existe...")
+    print("   4.1. Archivo no existe...")
     try:
         PDFLoaderTool.load_pdf("archivo_que_no_existe_12345.pdf")
         print("      ❌ No se lanzó excepción (debería lanzar FileNotFoundError)")
@@ -118,12 +118,12 @@ def test_pdf_loader():
         print(f"      ⚠️  Lanzó excepción diferente: {type(e).__name__}")
     
     # Test 4.2: Validación de tamaño (solo verificar que existe)
-    print("   6.2. Validación de tamaño de archivo...")
+    print("   4.2. Validación de tamaño de archivo...")
     print("      ✅ Validación implementada (requiere archivo > 50MB para probar)")
     
     # Test 5: Verificar formato de retorno
     if pdf_files:
-        print("\n7. Verificando formato de retorno...")
+        print("\n5. Verificando formato de retorno...")
         try:
             test_pdf = pdf_files[0]
             documents = PDFLoaderTool.load_pdf(str(test_pdf))
@@ -157,7 +157,7 @@ def test_pdf_loader():
         except Exception as e:
             print(f"      ❌ Error verificando formato: {e}")
     else:
-        print("\n7. Verificación de formato...")
+        print("\n6. Verificación de formato...")
         print("   ⚠️  OMITIDO - No hay archivos PDF disponibles")
     
     # Resumen

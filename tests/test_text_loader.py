@@ -23,7 +23,7 @@ def test_text_loader():
     RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
     
     # Test 1: Buscar archivos TXT
-    print("\n2. Buscando archivos TXT en data/raw/...")
+    print("\n1. Buscando archivos TXT en data/raw/...")
     txt_files = list(RAW_DATA_DIR.glob("*.txt"))
     print(f"   📁 Directorio: {RAW_DATA_DIR}")
     print(f"   📄 Archivos TXT encontrados: {len(txt_files)}")
@@ -41,7 +41,7 @@ def test_text_loader():
     # Test 2: Crear archivo TXT de prueba si no hay archivos
     test_txt_created = False
     if not txt_files:
-        print("\n3. Creando archivo TXT de prueba...")
+        print("\n2. Creando archivo TXT de prueba...")
         try:
             test_txt_path = RAW_DATA_DIR / "test_dinosaurios.txt"
             test_txt_content = """Historia de los Dinosaurios
@@ -71,7 +71,7 @@ Sin embargo, las aves modernas son descendientes directos de los dinosaurios ter
     
     # Test 3: Cargar un TXT individual (si existe)
     if txt_files:
-        print("\n4. Probando carga de TXT individual (con párrafos)...")
+        print("\n3. Probando carga de TXT individual (con párrafos)...")
         try:
             test_txt = txt_files[0]
             print(f"   📄 Probando con: {test_txt.name}")
@@ -106,12 +106,12 @@ Sin embargo, las aves modernas son descendientes directos de los dinosaurios ter
             import traceback
             traceback.print_exc()
     else:
-        print("\n4. Carga de TXT individual...")
+        print("\n3. Carga de TXT individual...")
         print("   ⚠️  OMITIDO - No hay archivos TXT disponibles")
     
     # Test 4: Cargar TXT sin dividir en párrafos
     if txt_files:
-        print("\n5. Probando carga de TXT sin dividir párrafos...")
+        print("\n4. Probando carga de TXT sin dividir párrafos...")
         try:
             test_txt = txt_files[0]
             documents = TextLoaderTool.load_text(str(test_txt), split_paragraphs=False)
@@ -126,7 +126,7 @@ Sin embargo, las aves modernas son descendientes directos de los dinosaurios ter
     
     # Test 5: Cargar múltiples TXTs (si hay 2+)
     if len(txt_files) >= 2:
-        print("\n6. Probando carga de múltiples TXTs...")
+        print("\n5. Probando carga de múltiples TXTs...")
         try:
             test_txts = [str(t) for t in txt_files[:3]]  # Probar con máximo 3
             print(f"   📚 Cargando {len(test_txts)} archivos TXT...")
@@ -149,14 +149,14 @@ Sin embargo, las aves modernas son descendientes directos de los dinosaurios ter
         except Exception as e:
             print(f"   ❌ Error: {e}")
     else:
-        print("\n6. Carga de múltiples TXTs...")
+        print("\n5. Carga de múltiples TXTs...")
         print("   ⚠️  OMITIDO - Se requieren al menos 2 archivos TXT")
     
     # Test 6: Manejo de errores
-    print("\n7. Probando manejo de errores...")
+    print("\n6. Probando manejo de errores...")
     
     # Test 6.1: Archivo no existe
-    print("   7.1. Archivo no existe...")
+    print("   6.1. Archivo no existe...")
     try:
         TextLoaderTool.load_text("archivo_que_no_existe_12345.txt")
         print("      ❌ No se lanzó excepción (debería lanzar FileNotFoundError)")
@@ -166,12 +166,12 @@ Sin embargo, las aves modernas son descendientes directos de los dinosaurios ter
         print(f"      ⚠️  Lanzó excepción diferente: {type(e).__name__}")
     
     # Test 6.2: Validación de tamaño (solo verificar que existe)
-    print("   7.2. Validación de tamaño de archivo...")
+    print("   6.2. Validación de tamaño de archivo...")
     print("      ✅ Validación implementada (requiere archivo > 50MB para probar)")
     
     # Test 7: Verificar formato de retorno
     if txt_files:
-        print("\n8. Verificando formato de retorno...")
+        print("\n7. Verificando formato de retorno...")
         try:
             test_txt = txt_files[0]
             documents = TextLoaderTool.load_text(str(test_txt), split_paragraphs=True)
@@ -205,12 +205,12 @@ Sin embargo, las aves modernas son descendientes directos de los dinosaurios ter
         except Exception as e:
             print(f"      ❌ Error verificando formato: {e}")
     else:
-        print("\n8. Verificación de formato...")
+        print("\n7. Verificación de formato...")
         print("   ⚠️  OMITIDO - No hay archivos TXT disponibles")
     
     # Test 8: Verificar detección de encoding
     if txt_files:
-        print("\n9. Verificando detección de encoding...")
+        print("\n8. Verificando detección de encoding...")
         try:
             test_txt = txt_files[0]
             # El método _detect_encoding es privado, pero podemos verificar que funciona

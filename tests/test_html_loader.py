@@ -23,7 +23,7 @@ def test_html_loader():
     RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
     
     # Test 1: Buscar archivos HTML
-    print("\n3. Buscando archivos HTML en data/raw/...")
+    print("\n1. Buscando archivos HTML en data/raw/...")
     html_files = list(RAW_DATA_DIR.glob("*.html")) + list(RAW_DATA_DIR.glob("*.htm"))
     print(f"   📁 Directorio: {RAW_DATA_DIR}")
     print(f"   📄 Archivos HTML encontrados: {len(html_files)}")
@@ -41,7 +41,7 @@ def test_html_loader():
     # Test 2: Crear HTML de prueba si no hay archivos
     test_html_created = False
     if not html_files:
-        print("\n4. Creando archivo HTML de prueba...")
+        print("\n2. Creando archivo HTML de prueba...")
         try:
             test_html_path = RAW_DATA_DIR / "test_dinosaurios.html"
             test_html_content = """<!DOCTYPE html>
@@ -86,7 +86,7 @@ def test_html_loader():
     
     # Test 3: Cargar un HTML individual (si existe)
     if html_files:
-        print("\n5. Probando carga de HTML individual...")
+        print("\n3. Probando carga de HTML individual...")
         try:
             test_html = html_files[0]
             print(f"   📄 Probando con: {test_html.name}")
@@ -135,7 +135,7 @@ def test_html_loader():
     
     # Test 4: Cargar múltiples HTMLs (si hay 2+)
     if len(html_files) >= 2:
-        print("\n6. Probando carga de múltiples HTMLs...")
+        print("\n4. Probando carga de múltiples HTMLs...")
         try:
             test_htmls = [str(h) for h in html_files[:3]]  # Probar con máximo 3
             print(f"   📚 Cargando {len(test_htmls)} archivos HTML...")
@@ -162,10 +162,10 @@ def test_html_loader():
         print("   ⚠️  OMITIDO - Se requieren al menos 2 archivos HTML")
     
     # Test 5: Manejo de errores
-    print("\n7. Probando manejo de errores...")
+    print("\n5. Probando manejo de errores...")
     
     # Test 5.1: Archivo no existe
-    print("   7.1. Archivo no existe...")
+    print("   5.1. Archivo no existe...")
     try:
         HTMLLoaderTool.load_html("archivo_que_no_existe_12345.html")
         print("      ❌ No se lanzó excepción (debería lanzar FileNotFoundError)")
@@ -175,12 +175,12 @@ def test_html_loader():
         print(f"      ⚠️  Lanzó excepción diferente: {type(e).__name__}")
     
     # Test 5.2: Validación de tamaño (solo verificar que existe)
-    print("   7.2. Validación de tamaño de archivo...")
+    print("   5.2. Validación de tamaño de archivo...")
     print("      ✅ Validación implementada (requiere archivo > 50MB para probar)")
     
     # Test 6: Verificar formato de retorno
     if html_files:
-        print("\n8. Verificando formato de retorno...")
+        print("\n6. Verificando formato de retorno...")
         try:
             test_html = html_files[0]
             documents = HTMLLoaderTool.load_html(str(test_html))
@@ -214,12 +214,12 @@ def test_html_loader():
         except Exception as e:
             print(f"      ❌ Error verificando formato: {e}")
     else:
-        print("\n8. Verificación de formato...")
+        print("\n7. Verificación de formato...")
         print("   ⚠️  OMITIDO - No hay archivos HTML disponibles")
     
     # Test 7: Verificar extracción de título
     if html_files:
-        print("\n9. Verificando extracción de título...")
+        print("\n8. Verificando extracción de título...")
         try:
             test_html = html_files[0]
             documents = HTMLLoaderTool.load_html(str(test_html))
