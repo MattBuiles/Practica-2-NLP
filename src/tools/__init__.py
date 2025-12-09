@@ -32,6 +32,10 @@ from .logging_tool import (
     get_available_documents_info
 )
 
+# Aliases para compatibilidad con nombres esperados
+retrieve_documents = search_documents  # Alias
+generate_response = generate_rag_response  # Alias
+
 # Indexer Tools
 from .document_loader_tool import (
     load_document,
@@ -73,6 +77,10 @@ __all__ = [
     'log_agent_decision',
     'log_agent_action',
     'get_available_documents_info',
+    
+    # Aliases para compatibilidad
+    'retrieve_documents',
+    'generate_response',
     
     # LangChain Tools - Indexing
     'load_document',

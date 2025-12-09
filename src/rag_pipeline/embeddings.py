@@ -111,6 +111,19 @@ class EmbeddingsManager:
             logger.error(f"Error generando embedding: {e}")
             raise
     
+    def embed_query(self, text: str) -> List[float]:
+        """
+        Alias de embed_text para compatibilidad.
+        Genera embedding para una consulta.
+        
+        Args:
+            text: Texto de la consulta
+            
+        Returns:
+            Lista de floats representando el vector de embedding
+        """
+        return self.embed_text(text)
+    
     def embed_texts(self, texts: List[str]) -> List[List[float]]:
         """
         Genera embeddings para múltiples textos (batch).
