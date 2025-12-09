@@ -8,18 +8,19 @@ from pathlib import Path
 os.environ['GOOGLE_API_KEY'] = 'your-key-here'  # Cambiar
 os.environ['GROQ_API_KEY'] = 'your-key-here'     # Cambiar
 
-from src.agents.orchestrator import Orchestrator
+from src.agents.autonomous_orchestrator import AutonomousOrchestrator
+from src.agents.autonomous_indexer_agent import AutonomousIndexerAgent
 from src.rag_pipeline.pipelines import RAGPipeline
 from src.tools.trace_exporter import TraceExporterTool
 
 
 def example_1_basic_query():
-    """Ejemplo 1: Consulta básica de búsqueda."""
+    """Ejemplo 1: Consulta básica de búsqueda con Sistema Autónomo."""
     print("\n" + "="*60)
-    print("EJEMPLO 1: Consulta de Búsqueda")
+    print("EJEMPLO 1: Consulta de Búsqueda (Sistema Autónomo)")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    orchestrator = AutonomousOrchestrator()
     
     query = "¿Qué es la diabetes y cuáles son sus síntomas principales?"
     
@@ -30,18 +31,19 @@ def example_1_basic_query():
     print("🤖 Respuesta:")
     print(result['response'])
     print("\n" + "-"*60)
-    print(f"📊 Intención detectada: {result['intent']}")
+    print(f"📊 Intención detectada: {result.get('classification', {}).get('intent', 'N/A')}")
     print(f"📚 Documentos consultados: {result.get('documents_found', 0)}")
-    print(f"🔄 Regeneraciones: {result.get('regeneration_attempts', 0)}")
+    print(f"🔄 Regeneraciones: {result.get('regeneration_count', 0)}")
+    print(f"🤖 Agentes llamados: {', '.join(result.get('trace', {}).get('agents_called', []))}")
 
 
 def example_2_summary():
-    """Ejemplo 2: Solicitud de resumen."""
+    """Ejemplo 2: Solicitud de resumen con Sistema Autónomo."""
     print("\n" + "="*60)
-    print("EJEMPLO 2: Solicitud de Resumen")
+    print("EJEMPLO 2: Solicitud de Resumen (Sistema Autónomo)")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    orchestrator = AutonomousOrchestrator()
     
     query = "Resume los principales tratamientos para la hipertensión"
     
@@ -51,15 +53,17 @@ def example_2_summary():
     
     print("🤖 Respuesta:")
     print(result['response'])
+    print("\n" + "-"*60)
+    print(f"🔧 Herramientas usadas: {', '.join(result.get('trace', {}).get('tools_used', []))}")
 
 
 def example_3_comparison():
-    """Ejemplo 3: Comparación de conceptos."""
+    """Ejemplo 3: Comparación de conceptos con Sistema Autónomo."""
     print("\n" + "="*60)
-    print("EJEMPLO 3: Comparación")
+    print("EJEMPLO 3: Comparación (Sistema Autónomo)")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    orchestrator = AutonomousOrchestrator()
     
     query = "Compara diabetes tipo 1 y diabetes tipo 2"
     
@@ -69,15 +73,17 @@ def example_3_comparison():
     
     print("🤖 Respuesta:")
     print(result['response'])
+    print("\n" + "-"*60)
+    print(f"✅ Validación: {result.get('validation', {}).get('is_valid', 'N/A')}")
 
 
 def example_4_general():
-    """Ejemplo 4: Consulta general (sin RAG)."""
+    """Ejemplo 4: Consulta general (sin RAG) con Sistema Autónomo."""
     print("\n" + "="*60)
-    print("EJEMPLO 4: Consulta General")
+    print("EJEMPLO 4: Consulta General (Sistema Autónomo)")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    orchestrator = AutonomousOrchestrator()
     
     query = "¿Cuál es la capital de Francia?"
     
@@ -88,16 +94,17 @@ def example_4_general():
     print("🤖 Respuesta:")
     print(result['response'])
     print("\n" + "-"*60)
-    print(f"📊 Requiere RAG: {result.get('requires_rag', False)}")
+    print(f"📊 Requiere RAG: {result.get('classification', {}).get('requires_rag', False)}")
+    print(f"🤖 Decisión autónoma: Respuesta general sin documentos")
 
 
 def example_5_batch_processing():
-    """Ejemplo 5: Procesamiento en lote."""
+    """Ejemplo 5: Procesamiento en lote con Sistema Autónomo."""
     print("\n" + "="*60)
-    print("EJEMPLO 5: Procesamiento en Lote")
+    print("EJEMPLO 5: Procesamiento en Lote (Sistema Autónomo)")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    orchestrator = AutonomousOrchestrator()
     
     queries = [
         "¿Qué es la hipertensión?",
@@ -105,57 +112,65 @@ def example_5_batch_processing():
         "Compara paracetamol e ibuprofeno"
     ]
     
-    print(f"\n📋 Procesando {len(queries)} consultas...\n")
+    print(f"\n📋 Procesando {len(queries)} consultas con agentes autónomos...\n")
     
-    results = orchestrator.process_batch(queries)
+    results = []
+    for query in queries:
+        result = orchestrator.process_query(query)
+        results.append(result)
     
     for i, result in enumerate(results, 1):
         print(f"\n--- Consulta {i} ---")
         print(f"Query: {queries[i-1]}")
-        print(f"Intent: {result['intent']}")
+        print(f"Intent: {result.get('classification', {}).get('intent', 'N/A')}")
         print(f"Docs: {result.get('documents_found', 0)}")
+        print(f"Tools: {', '.join(result.get('trace', {}).get('tools_used', [])[:3])}...")
 
 
 def example_6_with_tracing():
-    """Ejemplo 6: Consulta con análisis de traza."""
+    """Ejemplo 6: Consulta con análisis de traza autónoma."""
     print("\n" + "="*60)
-    print("EJEMPLO 6: Análisis de Traza de Ejecución")
+    print("EJEMPLO 6: Análisis de Traza de Ejecución (Autónomo)")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    orchestrator = AutonomousOrchestrator()
     
     query = "¿Cuáles son los factores de riesgo cardiovascular?"
     
     print(f"\n📝 Consulta: {query}\n")
     
-    result = orchestrator.process_query(query, include_trace=True)
+    result = orchestrator.process_query(query)
     
     print("🤖 Respuesta:")
     print(result['response'])
     
-    # Mostrar traza
-    if result.get('trace_summary'):
+    # Mostrar traza detallada
+    if result.get('trace'):
+        trace = result['trace']
         print("\n" + "-"*60)
-        print("📊 TRAZA DE EJECUCIÓN:")
+        print("📊 TRAZA DE EJECUCIÓN AUTÓNOMA:")
         print("-"*60)
-        print(result['trace_summary'])
+        print(f"Agentes llamados: {', '.join(trace.get('agents_called', []))}")
+        print(f"Tools usadas: {', '.join(trace.get('tools_used', []))}")
+        print(f"Regeneraciones: {trace.get('regeneration_count', 0)}")
+        print(f"Total de pasos: {len(trace.get('steps', []))}")
 
 
 def example_7_export_case_study():
-    """Ejemplo 7: Exportar caso de uso."""
+    """Ejemplo 7: Exportar caso de uso con Sistema Autónomo."""
     print("\n" + "="*60)
-    print("EJEMPLO 7: Exportar Caso de Uso")
+    print("EJEMPLO 7: Exportar Caso de Uso (Sistema Autónomo)")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    orchestrator = AutonomousOrchestrator()
     
     query = "Explica qué es la obesidad y sus consecuencias"
     
     print(f"\n📝 Consulta: {query}\n")
     
-    result = orchestrator.process_query(query, include_trace=True)
+    result = orchestrator.process_query(query)
     
-    print("🤖 Respuesta generada ✓")
+    print("🤖 Respuesta generada con agentes autónomos ✓")
     
     # Exportar
     filepath = TraceExporterTool.export_case_study(
@@ -163,46 +178,52 @@ def example_7_export_case_study():
         query=query,
         response=result['response'],
         trace_data=result.get('trace', {}),
-        domain="salud"
+        domain="salud_autonomo"
     )
     
     print(f"\n💾 Caso de uso exportado a: {filepath}")
+    print(f"🔧 Decisiones autónomas documentadas en trace")
 
 
 def example_8_system_stats():
-    """Ejemplo 8: Estadísticas del sistema."""
+    """Ejemplo 8: Estadísticas del Sistema Autónomo."""
     print("\n" + "="*60)
-    print("EJEMPLO 8: Estadísticas del Sistema")
+    print("EJEMPLO 8: Estadísticas del Sistema Autónomo")
     print("="*60)
     
-    orchestrator = Orchestrator()
+    # Indexer stats
+    indexer = AutonomousIndexerAgent()
+    stats_result = indexer.get_stats()
     
-    stats = orchestrator.get_system_stats()
+    print("\n🤖 Sistema Agentic AI Autónomo:")
+    print(f"   - Agentes: 6 autónomos con tool calling")
+    print(f"   - Total Tools: 22 (11 query + 11 indexing)")
+    print(f"   - LLMs: Gemini 2.5 Flash + Groq Llama 3.1 70B")
     
-    print("\n📊 Configuración de Agentes:")
-    for agent, llm in stats['agents'].items():
-        print(f"   - {agent}: {llm}")
+    print("\n📚 Índice Vectorial:")
+    if stats_result['status'] == 'success':
+        print(f"   {stats_result['response']}")
+    else:
+        print(f"   - Error obteniendo estadísticas")
     
-    print(f"\n📚 Vector Store:")
-    vs_stats = stats['vectorstore']
-    print(f"   - Status: {vs_stats.get('status', 'unknown')}")
-    print(f"   - Documentos: {vs_stats.get('total_documents', 0)}")
-    
-    print(f"\n📝 Trazas recolectadas: {stats['traces_collected']}")
+    print("\n✨ Características Autónomas:")
+    print("   - Agentes deciden qué tools usar")
+    print("   - Sin flujo hardcoded")
+    print("   - Trazabilidad completa de decisiones")
 
 
 def run_all_examples():
-    """Ejecuta todos los ejemplos."""
+    """Ejecuta todos los ejemplos con Sistema Autónomo."""
     print("\n" + "="*60)
-    print("🚀 SISTEMA AGENTIC AI - DEMOSTRACIÓN COMPLETA")
+    print("🚀 SISTEMA AGENTIC AI AUTÓNOMO - DEMOSTRACIÓN COMPLETA")
     print("="*60)
     
     try:
-        # Cargar índice primero
-        print("\n📚 Cargando índice de documentos...")
-        pipeline = RAGPipeline()
-        pipeline.load_existing_index()
-        print("✅ Índice cargado\n")
+        # Cargar índice con agente autónomo
+        print("\n📚 Cargando índice con Agente Indexador Autónomo...")
+        indexer = AutonomousIndexerAgent()
+        indexer.load_existing_index()
+        print("✅ Índice cargado por agente autónomo\n")
         
         # Ejecutar ejemplos
         example_1_basic_query()
@@ -215,7 +236,13 @@ def run_all_examples():
         example_8_system_stats()
         
         print("\n" + "="*60)
-        print("✅ DEMOSTRACIÓN COMPLETADA")
+        print("✅ DEMOSTRACIÓN AUTÓNOMA COMPLETADA")
+        print("="*60)
+        print("\n🎯 Sistema Autónomo Demostrado:")
+        print("   ✓ 6 Agentes autónomos con tool calling")
+        print("   ✓ 22 LangChain tools (@tool decorator)")
+        print("   ✓ Decisiones autónomas documentadas")
+        print("   ✓ Trazabilidad completa de herramientas")
         print("="*60 + "\n")
         
     except Exception as e:
@@ -223,7 +250,8 @@ def run_all_examples():
         print("\n💡 Asegúrate de:")
         print("   1. Tener documentos en data/raw/")
         print("   2. Haber ejecutado: python main.py --index")
-        print("   3. Configurar API keys en .env\n")
+        print("   3. Configurar API keys en .env")
+        print("   4. Sistema autónomo inicializado correctamente\n")
 
 
 if __name__ == "__main__":
@@ -245,9 +273,9 @@ if __name__ == "__main__":
         }
         
         if example_num in examples:
-            # Cargar índice
-            pipeline = RAGPipeline()
-            pipeline.load_existing_index()
+            # Cargar índice con agente autónomo
+            indexer = AutonomousIndexerAgent()
+            indexer.load_existing_index()
             
             examples[example_num]()
         else:

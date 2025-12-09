@@ -18,8 +18,8 @@ LoggerTool.setup_logging(log_level="INFO", log_to_file=True)
 logger = logging.getLogger(__name__)
 
 from src.config.paths import create_directories, RAW_DATA_DIR
-from src.agents.orchestrator import Orchestrator
-from src.agents.indexer_agent import IndexerAgent
+from src.agents.autonomous_orchestrator import AutonomousOrchestrator
+from src.agents.autonomous_indexer_agent import AutonomousIndexerAgent
 from src.rag_pipeline.pipelines import RAGPipeline
 from src.tools.trace_exporter import TraceExporterTool
 
@@ -48,7 +48,7 @@ def initialize_system():
 
 def index_documents(documents_path: str = None):
     """
-    Indexa documentos desde un directorio.
+    Indexa documentos desde un directorio usando el Agente Indexador Autónomo.
     
     Args:
         documents_path: Ruta del directorio con documentos (usa RAW_DATA_DIR por defecto)
@@ -56,9 +56,9 @@ def index_documents(documents_path: str = None):
     if documents_path is None:
         documents_path = str(RAW_DATA_DIR)
     
-    logger.info(f"=== Indexando documentos desde: {documents_path} ===")
+    logger.info(f"=== Indexación Autónoma desde: {documents_path} ===")
     
-    # Verificar que existen documentos
+    # Verificar que existe el directorio
     doc_path = Path(documents_path)
     if not doc_path.exists():
         logger.error(f"Directorio no existe: {documents_path}")
@@ -66,55 +66,63 @@ def index_documents(documents_path: str = None):
         print(f"📁 Coloca tus documentos en: {RAW_DATA_DIR}")
         return False
     
-    # Contar documentos
-    pdf_count = len(list(doc_path.glob("**/*.pdf")))
-    html_count = len(list(doc_path.glob("**/*.html"))) + len(list(doc_path.glob("**/*.htm")))
-    txt_count = len(list(doc_path.glob("**/*.txt")))
-    total_docs = pdf_count + html_count + txt_count
+    print(f"\n🤖 Iniciando Agente Indexador Autónomo...")
+    print(f"📁 Directorio: {documents_path}\n")
     
-    if total_docs == 0:
-        logger.warning("No se encontraron documentos para indexar")
-        print(f"⚠️  No se encontraron documentos en {documents_path}")
-        return False
-    
-    print(f"\n📄 Documentos encontrados:")
-    print(f"   - PDF: {pdf_count}")
-    print(f"   - HTML: {html_count}")
-    print(f"   - TXT: {txt_count}")
-    print(f"   Total: {total_docs}\n")
-    
-    # Indexar
-    pipeline = RAGPipeline()
-    stats = pipeline.index_directory(
+    # Usar agente autónomo para indexación
+    indexer = AutonomousIndexerAgent()
+    result = indexer.index_directory(
         directory_path=documents_path,
-        file_types=['pdf', 'html', 'txt'],
+        file_types="pdf,html,txt",
         clean_aggressive=False,
         save_index=True
     )
     
-    logger.info(f"Indexación completada: {stats}")
-    print("\n✅ Indexación completada exitosamente")
-    print(f"   - Documentos procesados: {stats.get('cleaned_documents', 0)}")
-    print(f"   - Chunks generados: {stats.get('total_chunks', 0)}")
-    
-    return True
+    if result['status'] == 'success':
+        print("\n" + "="*60)
+        print("✅ INDEXACIÓN COMPLETADA EXITOSAMENTE")
+        print("="*60)
+        print(result['response'])
+        print("="*60)
+        
+        # Mostrar trace de decisiones
+        if result.get('intermediate_steps'):
+            print("\n🔍 Trazabilidad de Decisiones:")
+            for i, step in enumerate(result['intermediate_steps'][:5], 1):
+                action = step[0] if isinstance(step, tuple) else step
+                print(f"   {i}. {action.tool if hasattr(action, 'tool') else 'Acción'}")
+        
+        logger.info("Indexación autónoma completada exitosamente")
+        return True
+    else:
+        print(f"\n❌ Error en indexación: {result.get('error', 'Unknown error')}")
+        logger.error(f"Error en indexación autónoma: {result.get('error')}")
+        return False
 
 
 def interactive_mode():
-    """Modo interactivo para consultas."""
-    logger.info("=== Iniciando modo interactivo ===")
+    """Modo interactivo para consultas usando el Sistema Autónomo."""
+    logger.info("=== Iniciando modo interactivo autónomo ===")
     
-    # Cargar índice existente
-    pipeline = RAGPipeline()
+    # Cargar índice existente usando agente indexador
+    indexer = AutonomousIndexerAgent()
     try:
-        pipeline.load_existing_index()
-        stats = pipeline.get_stats()
+        print("\n🤖 Cargando índice vectorial...")
+        result = indexer.load_existing_index()
+        
+        if result['status'] != 'success':
+            print("❌ Error: No se pudo cargar el índice de documentos")
+            print("💡 Ejecuta primero: python main.py --index")
+            return
+        
+        stats_result = indexer.get_stats()
         
         print("\n" + "="*60)
-        print("🤖 Sistema Agentic AI - Modo Interactivo")
+        print("🤖 Sistema Agentic AI Autónomo - Modo Interactivo")
         print("="*60)
-        print(f"📊 Documentos indexados: {stats.get('total_documents', 0)}")
-        print(f"🔧 Agentes activos: Classifier, Retriever, RAG, Critic")
+        print("✅ Índice cargado exitosamente")
+        print(f"🔧 Agentes autónomos: Classifier, Retriever, RAG, Critic")
+        print(f"📊 Sistema listo para consultas")
         print("="*60 + "\n")
         
     except Exception as e:
@@ -123,8 +131,8 @@ def interactive_mode():
         print("💡 Ejecuta primero: python main.py --index")
         return
     
-    # Inicializar orquestador
-    orchestrator = Orchestrator()
+    # Inicializar orquestador autónomo
+    orchestrator = AutonomousOrchestrator()
     
     print("Escribe tu consulta (o 'salir' para terminar)\n")
     
@@ -188,12 +196,12 @@ def interactive_mode():
 
 def batch_mode(queries_file: str):
     """
-    Procesa consultas desde un archivo.
+    Procesa consultas desde un archivo usando el Sistema Autónomo.
     
     Args:
         queries_file: Archivo con consultas (una por línea)
     """
-    logger.info(f"=== Modo batch: {queries_file} ===")
+    logger.info(f"=== Modo batch autónomo: {queries_file} ===")
     
     # Leer consultas
     try:
@@ -204,18 +212,23 @@ def batch_mode(queries_file: str):
         print(f"❌ Error leyendo {queries_file}: {str(e)}")
         return
     
-    print(f"\n📋 Procesando {len(queries)} consultas...\n")
+    print(f"\n📋 Procesando {len(queries)} consultas con agentes autónomos...\n")
     
     # Cargar índice
-    pipeline = RAGPipeline()
-    pipeline.load_existing_index()
+    indexer = AutonomousIndexerAgent()
+    indexer.load_existing_index()
     
-    # Procesar consultas
-    orchestrator = Orchestrator()
-    results = orchestrator.process_batch(queries)
+    # Procesar consultas con orquestador autónomo
+    orchestrator = AutonomousOrchestrator()
+    results = []
+    
+    for i, query in enumerate(queries, 1):
+        print(f"[{i}/{len(queries)}] Procesando: {query[:50]}...")
+        result = orchestrator.process_query(query)
+        results.append(result)
     
     # Exportar resultados
-    TraceExporterTool.export_batch_results(results, batch_name="batch_queries")
+    TraceExporterTool.export_batch_results(results, batch_name="batch_queries_autonomous")
     
     print(f"\n✅ Procesamiento completado: {len(results)} resultados")
     print(f"📁 Resultados exportados a: results/respuestas/\n")

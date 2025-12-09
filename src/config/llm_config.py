@@ -103,3 +103,28 @@ class LLMConfig:
 
 # Instancia global
 llm_config = LLMConfig()
+
+# Funciones helper para importar directamente
+def get_classifier_llm():
+    """Helper para obtener el LLM clasificador."""
+    return llm_config.get_classifier_llm()
+
+def get_retriever_llm():
+    """Helper para obtener el LLM recuperador."""
+    return llm_config.get_retriever_llm()
+
+def get_rag_llm():
+    """Helper para obtener el LLM RAG."""
+    return llm_config.get_rag_llm()
+
+def get_critic_llm():
+    """Helper para obtener el LLM crítico."""
+    return llm_config.get_critic_llm()
+
+def get_orchestrator_llm():
+    """Helper para obtener el LLM orquestador."""
+    return llm_config.get_orchestrator_llm()
+
+def get_general_llm():
+    """Helper para obtener el LLM general."""
+    return llm_config.get_general_llm()
