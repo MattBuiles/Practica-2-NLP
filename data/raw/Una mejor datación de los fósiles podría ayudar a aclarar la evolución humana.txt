@@ -1,0 +1,232 @@
+Una mejor datación de los fósiles podría ayudar a aclarar la evolución humana
+Por James Ashworth
+
+Primera publicación: 18 de diciembre de 2023
+
+39
+El tiempo es crucial cuando se trata de comprender los orígenes de la humanidad.
+
+El desarrollo de mejores técnicas de datación para descubrir las edades de fósiles clave ayudará a los científicos a descubrir cómo evolucionaron el Homo sapiens y nuestros parientes.
+
+Volver a lo básico podría ayudar a desvelar los misterios de la evolución humana .
+
+Nuestros orígenes han sido notoriamente difíciles de descifrar, con una variedad de evidencia contradictoria y controvertida que hace difícil determinar exactamente cómo evolucionó nuestra especie.
+
+Un nuevo artículo, publicado en la revista Quaternary Science Reviewsabre en una nueva ventanaPropone una solución simple con dos frentes: encontrar más fósiles y datar mejor los que ya tenemos. Esto ayudará a completar grandes piezas del rompecabezas evolutivo y a resolver antiguos dilemas en este campo.
+
+El profesor Chris Stringer , experto en evolución humana del Museo de Historia Natural y coautor del artículo, afirma: "A pesar de más de un siglo de estudio, hay muchas regiones del mundo que aún no han sido exploradas en busca de fósiles".
+
+Si bien las herramientas de piedra sugieren que debe haber yacimientos, grandes zonas de Arabia, el subcontinente indio, el sudeste asiático y África central y occidental no han sido exploradas exhaustivamente. Donde sí lo hemos hecho, especies inusuales como el Homo floresiensis y el Homo luzonensis muestran lo que podría haber allí si nos tomamos el tiempo de buscar.
+
+No se trata solo de dónde, sino también de cuándo. Con la mejora continua de las técnicas de datación, podemos empezar a resolver las complejas relaciones entre el Homo sapiens y nuestros parientes antiguos.
+
+Una réplica del cráneo del Homo floresiensis.
+Posteriormente se descubrió que la datación inicial del Homo floresiensis tenía un error de unos 40.000 años. Imagen © Ryan Somma, licencia CC BY-SA 2.0.abre en una nueva ventanavía Flickrabre en una nueva ventana.
+
+¿Cómo se datan los fósiles?
+Desde que se descubrieron los primeros fósiles de parientes humanos en el siglo XIX, cuando se desenterraron huesos de neandertales en Gibraltar y Alemania, los científicos han estado tratando de reconstruir nuestros orígenes.
+
+Pero a medida que los científicos han rastreado nuestro viaje evolutivo a través del tiempo, se han encontrado con algunos obstáculos. Se ha cuestionado el estatus de algunas especies humanas antiguas , mientras que las grandes lagunas en el registro fósil dificultan determinar la trayectoria exacta de la evolución.
+
+Aquí es donde entran en juego las citas.abre en una nueva ventanaAl determinar la edad del fósil (o del sedimento en el que fue enterrado), los investigadores pueden comenzar a desentrañar mejor la serie de eventos en la evolución de los humanos y nuestros parientes.
+
+Many techniques, such as radiocarbon dating, rely on the decay of radioactive elements. After an organism dies, the levels of a naturally occurring radioactive form of carbon, known as carbon-14, will fall as it gradually transforms into a more stable form of the element.
+
+As this occurs at a steady rate, the exact proportion of carbon-14 left in the remains of animals can be used to work out how old a fossil is.
+
+Other methods, meanwhile, depend on the physical structure of the fossil. Amino acid dating, for instance, relies on a curious quirk of living things: all of their amino acids, the building blocks of proteins, point in the same direction.
+
+After death, some of the amino acids begin to flip, so the amount pointing in each direction can be used to work out the age of a sample.
+
+Even with these different techniques, dating can be a tricky business. For example, radiocarbon dating only works for fossils that are 50,000 years old or younger, while amino acid dating fell out of favour when it was stretched beyond its capabilities.
+
+It’s also a question of geology. Even if a bone is of a certain age, it might be buried in substrate which is much younger or older. This affected the discovery of Homo floresiensis, which was initially thought to be less than 20,000 years oldopens in a new window based on the dating of charcoal fragments.
+
+In reality, it turned out a much younger layer of sediment had intruded into an older region, with the bones being closer to 60,000 years old.
+
+To avoid issues like these, where possible researchers now try to directly date bones. As part of a comprehensive review of the subject, Chris and his colleague Professor Rainer Grün have tried to provide more precise timings for human fossils all over the world.
+
+Rainer says, ‘This paper re-examines many existing sites that are important to the study of human evolution, providing some astonishing findings while reflecting our complementary research collaboration and friendship over the last 37 years.’
+
+Una vista aérea del cabo Matapan en la región griega de Mani.
+Apidima cave is located in the Mani region of Greece, with the new paper providing additional support for its Homo sapiens fossils being over 210,000 years old. Image © Marianna Ianovska/Shutterstock.
+
+Turning back the clock
+To date these sites, Chris and Rainer made use of another technique known as uranium series dating. Similarly to radiocarbon dating, this instead looks at the proportion of uranium isotopes in fossils as they break down.
+
+Whilst this technique can date fossils that are hundreds of thousands of years old, giving it an advantage over other methods, it’s not completely straightforward.
+
+‘The problem with bone is that it’s an open system,’ Chris says. ‘Uranium can get into the bone, allowing it to be dated, but this also means more can be added or washed out over time.’
+
+Anteriormente, para solucionar este problema, los científicos podían cortar el fósil por la mitad y rastrear el uranio a través del hueso. Pero esto no es factible en fósiles humanos valiosos. En cambio, Rainer ha ayudado a miniaturizar el proceso, de modo que se puedan tomar muestras diminutas mediante láseres para minimizar el daño en áreas importantes del espécimen.
+
+Esta técnica de datación ha sido especialmente útil en el yacimiento de la cueva de Apidima , donde se ha hallado un fósil de Homo sapiens primitivo con más de 210.000 años de antigüedad. Esto lo convierte actualmente en la evidencia más temprana de nuestra especie en Europa y Asia, aunque el hallazgo ha generado controversia.
+
+"El fragmento de cráneo de Homo sapiens era alrededor de 40.000 años más antiguo que un cráneo de Neandertal encontrado en el sitio, lo que es una situación extraña ya que generalmente esperaríamos que fuera al revés", dice Chris.
+
+Algunos científicos argumentaron que debían tener la misma edad, pero nuestros nuevos análisis muestran que tienen historias de deposición diferentes. No pudieron haber sido enterrados al mismo tiempo.
+
+Algunos de sus otros hallazgos plantean nuevas preguntas. Por ejemplo, algunos especímenes de la especie Homo luzonensis podrían tener hasta 135.000 años, más del doble de la edad que se cree actualmente.
+
+Chris y Rainer esperan que a medida que las técnicas de datación se mejoren continuamente, otros investigadores volverán y calcularán edades aún más precisas para los fósiles y aplicarán los métodos a muchos más especímenes.
+
+«Es difícil predecir qué nuevas técnicas surgirán, pero creo que podríamos ver el perfeccionamiento de los métodos existentes», afirma Chris. «Ha habido un renovado interés en la datación por aminoácidos, que está arrojando resultados prometedores basados ​​en el esmalte dental y fragmentos de moluscos de yacimientos de Gran Bretaña y otros lugares».
+
+'La datación del ADN, que utiliza la tasa de mutación para evaluar la antigüedad de un fósil, también está adquiriendo importancia.'
+
+'Si se utilizan estas técnicas con cuidado, creo que las perspectivas son excelentes para aumentar nuestra comprensión de la evolución humana'.
+
+Leer más
+Lea el artículo completo publicado en Quaternary Science Reviewsabre en una nueva ventana.
+Descubra en qué más está trabajando Chris .
+punta de arpón
+Explorar la evolución humana
+La ciencia de los museos está ayudando a responder dónde, cuándo y cómo evolucionaron los humanos.
+
+Explora nuestros orígenes
+
+39
+evolución humana
+fósiles
+Prehistórico
+Mamíferos
+Investigación en museos
+Publicaciones relacionadas
+
+Noticias científicas
+
+La evidencia más antigua del canibalismo humano como práctica funeraria
+En todo el norte de Europa se han encontrado huesos humanos con marcas de cortes, fracturas y mordeduras humanas. 
+
+4 de octubre de 2023
+
+Noticias científicas
+
+Los primeros fósiles humanos hallados en el Reino Unido revelan cómo estaban conectados los antiguos homínidos europeos
+Los fósiles descubiertos en Sussex se compararon con restos humanos encontrados en España de un período similar para ver si las poblaciones están relacionadas.
+
+14 de noviembre de 2022
+
+Noticias científicas
+
+La extinción de los neandertales pudo haber sido causada por el sexo, no por las peleas
+La cuestión de cómo se extinguieron los neandertales sigue siendo uno de los mayores misterios de la evolución humana.
+
+31 de octubre de 2022
+
+Noticias científicas
+
+Los senos paranasales ofrecen una nueva forma de estudiar la evolución de los humanos antiguos
+Aunque su función sigue siendo incierta, los senos paranasales proporcionan una idea de cómo cambiaron los cráneos humanos antiguos a lo largo del tiempo.
+
+21 de octubre de 2022
+No te pierdas nada
+Reciba actualizaciones por correo electrónico sobre nuestras noticias, ciencia, exposiciones, eventos, productos, servicios y actividades de recaudación de fondos. Ocasionalmente, podemos incluir contenido de terceros de nuestros socios corporativos y otros museos. No compartiremos sus datos personales con estos terceros. Debe ser mayor de 13 años. Aviso de privacidad .
+
+Nombre de pila *
+Nombre de pila
+Apellido *
+Apellido
+Dirección de correo electrónico *
+Dirección de correo electrónico
+
+Inscribirse
+Síguenos en las redes sociales
+El Museo de Historia Natural de Londres
+Abierto todos los días de 10:00 a 17:50
+
+Cerrado del 24 al 26 de diciembre
+
+Carretera de Cromwell
+
+Londres SW7 5BD
+
+El Museo de Historia Natural de Tring
+Abierto de martes a domingo y festivos.
+
+
+10:00-17:00 (última entrada 16:00)
+
+Cerrado del 24 al 26 de diciembre
+
+Calle Akeman
+
+Tring
+
+Hertfordshire HP23 6AP
+
+Visita
+Visita
+¿Qué hay?
+Mapa de galerías y museos
+Acceso
+Descubrir
+Descubrir
+Noticias
+Antropoceno
+Fauna británica
+Historias del museo
+Dinosaurios
+evolución humana
+Océanos
+Espacio
+¿Qué diablos?
+Para escuelas
+Para escuelas
+Visitando South Kensington
+Visitando Tring
+Recursos de aprendizaje
+Carreras
+Carreras
+Vacantes actuales
+Únete y apoya
+Únete y apoya
+Afiliación
+Membresía de regalo
+Haz una donación
+Conviértete en mecenas
+Asociaciones corporativas
+Participar
+Participar
+Actividades para todos
+Identificar la naturaleza
+Monitorear la naturaleza local
+Encuentra tu acción climática
+Voluntario
+Sobre nosotros
+Sobre nosotros
+Oficina de prensa
+Gobernancia
+Contáctanos
+Tienda online
+Tienda online
+Juguetes de dinosaurios
+Impresiones de vida silvestre a medida
+Libros relacionados con los museos
+Nuestra ciencia
+Nuestra ciencia
+Investigación
+Colecciones
+Conjuntos de datos
+Gente
+Instalaciones
+Estudio y eventos
+Biblioteca y Archivos
+Servicios empresariales
+Servicios empresariales
+Exposiciones itinerantes
+Consultante
+Publicación
+Lugares de rodaje de películas
+Imágenes del NHM
+Alquiler de local
+Licencias
+Legal
+Preferencias de cookies
+Aviso de privacidad
+Declaración de accesibilidad del sitio web
+Términos y condiciones
+Declaración sobre la esclavitud moderna
+© Los Fideicomisarios del Museo de Historia Natural de Londres
+
+Better fossil dating could help to clear up human evolution | Natural History Museum

@@ -1,0 +1,239 @@
+Los primeros fósiles británicos de dinosaurios terizinosaurios y troodóntidos son los más antiguos del mundo.
+Por James Ashworth
+
+Primera publicación: 14 de abril de 2023
+
+41
+Se pueden entrenar modelos de aprendizaje automático para identificar dientes de dinosaurios individuales.
+
+Esta técnica, desarrollada por científicos del Museo, se puede utilizar para abordar algunos de los mayores misterios de la paleontología incluso cuando el registro fósil es irregular. 
+
+Dientes aislados encontrados en el sur de Inglaterra podrían representar algunos de los primeros parientes de aves jamás descubiertos.
+
+Se cree que los dientes encontrados en Oxfordshire, Gloucestershire y Dorset pertenecen a los maniraptoranos, un grupo de dinosaurios, incluido el Velociraptor , que incluye a las aves y sus parientes más cercanos .
+
+Estos dinosaurios evolucionaron en numerosas especies durante el Jurásico Medio , pero como los fósiles de esta época son escasos, falta conocimiento sobre sus orígenes.
+
+Investigadores del Museo y del Birkbeck College utilizaron técnicas pioneras de aprendizaje automático para entrenar modelos informáticos para identificar los dientes misteriosos , que retroceden el origen de algunos de los miembros del grupo en casi 30 millones de años.
+
+Simón Willsabre en una nueva ventana, estudiante de doctorado del Museo que dirigió la investigación, afirma: «Investigaciones previas sugerían que los maniraptores existían en el Jurásico Medio, pero la evidencia fósil real era fragmentaria y controvertida. Junto con fósiles encontrados en otros lugares, esta investigación sugiere que el grupo ya había alcanzado una distribución global para entonces».
+
+'Los dientes que analizamos incluyen lo que actualmente son los únicos fósiles de troodóntidos y terizinosaurios jamás registrados en el Reino Unido y son la evidencia más antigua de estos dinosaurios en cualquier parte del mundo'.
+
+Los hallazgos del estudio fueron publicados en la revista Papers in Palaeontology.abre en una nueva ventana.
+
+Investigadores con ropa de alta visibilidad buscan dientes de dinosaurio en Woodeaton.
+Los fósiles del Jurásico Medio son relativamente escasos, y la cantera de Woodeaton, en Oxfordshire, es un punto clave para su hallazgo. Imagen © The Trustees of the Natural History Museum, Londres.
+
+¿Qué son los maniraptores?
+Los maniraptoranos son un grupo de dinosaurios que incluye todas las aves actuales, así como dinosaurios extintos como Deinonychus y Archaeopteryx .
+
+Históricamente, han sido de vital importancia para moldear nuestra comprensión de los dinosaurios. Hasta la década de 1960, se consideraba generalmente que estos antiguos reptiles eran animales lentos y torpes, pero la descripción del Deinonychus en 1969 comenzó a cambiar esta idea.abre en una nueva ventana.
+
+Its remains had the characteristics of a fast-running hunter, while also sharing similarities with living birds. Some maniraptorans are preserved with feathers, and as time passed, more evidence began to build that birds were the direct descendants of this group of dinosaurs.
+
+Among the closest relatives of birds are groups such as the dromaeosaurids, which contains Velociraptor and Vectiraptor, as well as related groups such as the troodontids and therizinosaurs.
+
+Una impresión artística de un Velociraptor, cubierto de plumas marrones y blancas.
+A variety of maniraptorans, such as Velociraptor, are thought to have been covered in feathers, based on fossil evidence and their close relationship with living birds. Image © Fred Wierum, licensed under CC BY-SA 4.0opens in a new window via Wikimedia Commonsopens in a new window
+
+
+Read more
+The troodontids are an extinct, bird-like group, while the therizinosaurs are a clade of dinosaurs with unusual characteristics such as extremely large claws measuring over 50 centimetres long.
+
+While their fossils are common in the Late Jurassic and Cretaceous, these maniraptorans are not well known from the Middle Jurassic. Some species, such as Eshanosaurus deguchiianusopens in a new window, have tentatively been identified from even earlier, but this is still being debated.
+
+'While the family tree of the maniraptorans suggests they evolved during the Middle Jurassic, there aren't many fossils from this period to prove this,' Simon explains.
+
+'As a result, any potential maniraptoran remains from the Middle Jurassic are important, because they can help us to understand dinosaur evolution. These remains are often isolated teeth, which can be difficult to assign to a particular dinosaur group, and so are left out of evolutionary models.'
+
+El holotipo de Eshanosaurus, que consiste en una mandíbula inferior.
+The enigmatic Eshanosaurus may be an Early Jurassic therizinosaur, but as it was described based on a single jawbone this is difficult to confirm. Image © Zanno et al, licensed under CC BY 4.0opens in a new window via PeerJopens in a new window. 
+
+Unlike in humans, dinosaurs had teeth which were continuously shed and replaced throughout their life. They are also highly resistant to erosion and degradation, making it more likely they will survive as fossils.
+
+While previous studies have attempted to classify isolated teethopens in a new window based on a variety of statistical methods, they've not always been particularly successful.
+
+The researchers behind the current study have been working to improve this, having demonstrated that machine learning models can achieve up to 96% accuracyopens in a new window in identifying isolated teeth from known taxa.
+
+Se han aplicado modelos similares a dientes del Jurásico Medio conservados en las colecciones del Museo y del Museo de Gloucester en un intento de identificarlos.
+
+'El uso del aprendizaje automático en la paleontología de vertebrados'abre en una nueva ventana«Aún está en sus primeras etapas», añade Simon. «Esto se debe en parte a la necesidad de contar con un conjunto completo de datos de entrenamiento para que los modelos aprendan a identificar los dientes de diferentes dinosaurios, y en parte a que los propios modelos también pueden ser bastante complejos».
+
+'En nuestro estudio tenemos la suerte de que ya existe un conjunto de datos relativamente grande de medidas de dientes de dinosaurios disponible que podríamos utilizar para entrenar los modelos'.
+
+Escaneos de cuatro caras de un diente de troodóntido (izquierda) y cuatro caras de un diente de terizinosaurio (derecha).
+Los dientes de troodonitd y terizinosaurio son los más antiguos del mundo. Imagen © The Trustees of the Natural History Museum, London and the Museum of Gloucester
+
+¿Cómo puede el aprendizaje automático identificar fósiles de dinosaurios?
+Para traducir la información contenida en los fósiles en datos que pudieran usarse en los modelos de aprendizaje automático, los investigadores primero tuvieron que producir un modelo 3D de cada diente a partir de una tomografía computarizada.
+
+Las mediciones de miles de dientes de especies conocidas de dinosaurios se utilizaron para entrenar tres modelos diferentes. Cada modelo analiza los datos de forma distinta y combina sus resultados para obtener la identidad más probable de cada diente.
+
+En comparación con otros métodos estadísticos, los modelos de aprendizaje automático dieron resultados más precisos y aumentaron la confianza de los investigadores de que podrían clasificar los dientes no identificados.
+
+Los modelos se aplicaron a los dientes aislados no identificados, y se descubrió que la mayoría pertenecían a maniraptores, en particular a dromeosáuridos . Estos dientes se dividieron en tres grupos distintos según su tamaño y forma.
+
+También se identificó un diente adicional como troodóntido y otro como terizinosaurio. Sin embargo, fue necesario calificarlos adicionalmente comparando su forma con dientes conocidos, ya que no pudieron identificarse únicamente con los modelos de aprendizaje automático.
+
+Sin embargo, la identificación de estos dos dientes retrasa 27 millones de años el origen de estos grupos.
+
+Al confirmar la presencia de estos grupos de dinosaurios en el Jurásico Medio, el artículo también respalda las teorías de que los maniraptoranos ya habían alcanzado una distribución mundial antes de que el supercontinente Pangea comenzara a fragmentarse hace unos 170 millones de años.
+
+Esta ruptura continental habría expuesto a estos dinosaurios a una variedad de condiciones ambientales diferentes, impulsando su diversificación en una gama de nuevas especies.
+
+A medida que continúan las innovaciones tecnológicas y los proyectos de digitalización hacen que haya más información disponible para crear conjuntos de datos de entrenamiento, es probable que el aprendizaje automático se vuelva más común como una forma de investigar cuestiones en paleontología.
+
+Leer más
+Lea el artículo completo publicado en Papers in Palaeontologyabre en una nueva ventana.
+Sigue a Simon en Twitterabre en una nueva ventana.
+
+Descubre los dinosaurios
+Descubra lo que los científicos del Museo están revelando sobre cómo se veían, vivían y se comportaban los dinosaurios.
+
+Desenterrar datos sobre los dinosaurios
+
+41
+Dinosaurios
+fósiles
+Prehistórico
+Reptiles
+Investigación en museos
+Publicaciones relacionadas
+
+Noticias científicas
+
+Dientes de tiranosaurio hallados en el sur de Inglaterra revelan un ecosistema de dinosaurios del Cretácico.
+Los espinosaurios, tiranosaurios y parientes del Velociraptor alguna vez acecharon la costa sur de Inglaterra.
+
+10 de diciembre de 2024
+
+Noticias científicas
+
+Desenterrado en Brasil el animal más antiguo conocido con dientes parecidos a los de los mamíferos
+El registro dental de un pequeño animal ha retrotraído el origen de los mamíferos en 20 millones de años. 
+
+16 de septiembre de 2022
+
+Noticias
+
+Los dientes fósiles podrían representar la última especie de panda de Europa
+Aunque la historia evolutiva de los osos sigue siendo incierta, aporta evidencia a las sugerencias de que los osos panda podrían haber evolucionado en Europa. 
+
+1 de agosto de 2022
+
+Dinosaurios
+
+Los diminutos dientes revelan la verdadera diversidad de los dinosaurios británicos
+Aquí vivió una variedad de dinosaurios mucho mayor de lo que pensábamos.
+
+No te pierdas nada
+Reciba actualizaciones por correo electrónico sobre nuestras noticias, ciencia, exposiciones, eventos, productos, servicios y actividades de recaudación de fondos. Ocasionalmente, podemos incluir contenido de terceros de nuestros socios corporativos y otros museos. No compartiremos sus datos personales con estos terceros. Debe ser mayor de 13 años. Aviso de privacidad .
+
+Nombre de pila *
+Nombre de pila
+Apellido *
+Apellido
+Dirección de correo electrónico *
+Dirección de correo electrónico
+
+Inscribirse
+Síguenos en las redes sociales
+El Museo de Historia Natural de Londres
+Abierto todos los días de 10:00 a 17:50
+
+Cerrado del 24 al 26 de diciembre
+
+Carretera de Cromwell
+
+Londres SW7 5BD
+
+El Museo de Historia Natural de Tring
+Abierto de martes a domingo y festivos.
+
+
+10:00-17:00 (última entrada 16:00)
+
+Cerrado del 24 al 26 de diciembre
+
+Calle Akeman
+
+Tring
+
+Hertfordshire HP23 6AP
+
+Visita
+Visita
+¿Qué hay?
+Mapa de galerías y museos
+Acceso
+Descubrir
+Descubrir
+Noticias
+Antropoceno
+Fauna británica
+Historias del museo
+Dinosaurios
+evolución humana
+Océanos
+Espacio
+¿Qué diablos?
+Para escuelas
+Para escuelas
+Visitando South Kensington
+Visitando Tring
+Recursos de aprendizaje
+Carreras
+Carreras
+Vacantes actuales
+Únete y apoya
+Únete y apoya
+Afiliación
+Membresía de regalo
+Haz una donación
+Conviértete en mecenas
+Asociaciones corporativas
+Participar
+Participar
+Actividades para todos
+Identificar la naturaleza
+Monitorear la naturaleza local
+Encuentra tu acción climática
+Voluntario
+Sobre nosotros
+Sobre nosotros
+Oficina de prensa
+Gobernancia
+Contáctanos
+Tienda online
+Tienda online
+Juguetes de dinosaurios
+Impresiones de vida silvestre a medida
+Libros relacionados con los museos
+Nuestra ciencia
+Nuestra ciencia
+Investigación
+Colecciones
+Conjuntos de datos
+Gente
+Instalaciones
+Estudio y eventos
+Biblioteca y Archivos
+Servicios empresariales
+Servicios empresariales
+Exposiciones itinerantes
+Consultante
+Publicación
+Lugares de rodaje de películas
+Imágenes del NHM
+Alquiler de local
+Licencias
+Legal
+Preferencias de cookies
+Aviso de privacidad
+Declaración de accesibilidad del sitio web
+Términos y condiciones
+Declaración sobre la esclavitud moderna
+© Los Fideicomisarios del Museo de Historia Natural de Londres
+
+First British fossils of therizinosaur and troodontid dinosaurs are world's oldest | Natural History Museum

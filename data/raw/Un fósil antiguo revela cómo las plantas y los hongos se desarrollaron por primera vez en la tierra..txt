@@ -1,0 +1,229 @@
+Un fósil antiguo revela cómo las plantas y los hongos se desarrollaron por primera vez en la tierra.
+Por James Ashworth
+
+Primera publicación: 12 de noviembre de 2025
+
+13
+Las plantas y los hongos han vivido juntos durante cientos de millones de años, a veces como aliados y a veces como enemigos.
+
+Un nuevo hongo fósil descubierto en Escocia ha revelado evidencia temprana de esta relación, ya que las plantas y los hongos compartían nutrientes para sobrevivir en la tierra.
+
+Una estructura microscópica congelada en el tiempo durante más de 400 millones de años ofrece pistas sobre el origen de una de las mayores asociaciones en la historia de la vida en la Tierra.
+
+Durante miles de millones de años, la vida en la Tierra se desarrolló exclusivamente en el agua. Fue hace apenas unos 500 millones de años que las plantas comenzaron a crecer en la tierra.abre en una nueva ventana– pero exactamente cómo estos organismos hicieron esa transición por primera vez sigue siendo un misterio.
+
+Una nueva investigación, publicada en la revista New Phytologist, se suma a un creciente conjunto de evidencias de que los hongos tuvieron un papel importante que desempeñar.
+
+Se encontró evidencia de la colaboración entre plantas y hongos, conocida como micorriza, en un fósil de 407 millones de años del sílex de Windyfield, Escocia. Dentro de los tejidos preservados de una planta antigua se encontraba una diminuta estructura llamada arbúsculo, que permite que plantas y hongos compartan nutrientes.
+
+Los científicos han bautizado este hongo como una nueva especie, Rugososporomyces lavoisierae , en honor a Marie-Anne Paulze de Lavoisier.abre en una nueva ventana, un científico francés que fue pionero de la fisiología y la química moderna a finales del siglo XVIII. Nuestra científica, la Dra. Christine Strullu-Derrien, dirigió la investigación.
+
+“Las micorrizas son muy raras en el registro fósil y nunca antes se habían encontrado en el sílex de Windyfield”, afirma Christine. “La presencia del arbúsculo demuestra que el hongo no parasitaba la planta ni se alimentaba de ella después de su muerte; en cambio, existía una asociación simbiótica”.
+
+“El hongo habría aportado minerales como el fósforo a cambio de azúcares de la planta, de una manera que los beneficia a ambos”.
+
+El Dr. Paul Kenrick , uno de nuestros expertos en plantas fósiles y coautor de la investigación, añade que es “extraordinario” encontrar evidencia tan antigua de una relación simbiótica.
+
+“La tierra firme habría sido un entorno muy difícil para la vida de las plantas”, explica Paul. “Hace unos 400 millones de años, la mayoría de las especies ni siquiera tenían raíces, lo que les dificultaba obtener los nutrientes que necesitaban”.
+
+Parece que las simbiosis fueron necesarias para que las plantas se adaptaran a la vida terrestre. Con más del 85% de las plantas vivas con micorrizasabre en una nueva ventana“Descubrir más sobre cómo se desarrollaron estas relaciones puede contribuir a nuestro conocimiento del pasado, el presente y el futuro”.
+
+El trozo de roca del sílex de Windyfield utilizado en el estudio, que muestra secciones de plantas preservadas y otros organismos.
+La roca de sílex de Windyfield se estudia tradicionalmente cortándola en rodajas lo suficientemente finas para su análisis microscópico. © Gareth Evans
+
+¿Qué es el pedernal de Windyfield?
+The Windyfield Chert is a layer of rocks from the Scottish Highlands that date back to the Early Devonian Period. It’s thought to be a similar age to the more famous Rhynie Chert, which is found nearby.
+
+Both the Windyfield and Rhynie Chert are world-renowned for preserving an ancient wetland ecosystem in extraordinary detail. During the Devonian these areas would probably have been similar to parts of Yellowstone National Park in the USA today, with sandy soils, hot springs and pools of water.
+
+This ecosystem came to an abrupt end around 407 million years ago, when silica-rich water from the hot springs overflowed into the wetland and entombed the species living there. This has provided scientists with astonishing wealth of well-preserved fossils to study from a key moment in the evolution of life.
+
+Historically, samples of the cherts have been cut into slices. These slices are thin enough that light can pass through them, allowing them to be placed under a light microscope so scientists can reconstruct what the ancient environment was like.
+
+While this works for larger plants in the chert, traditional white light microscopes struggle to image the tiny structures of the fungi. Instead, the researchers took a new sample from the Windyfield Chert and exposed it to laser light instead.
+
+“Light microscopy allows you to see specimens in great detail, but confocal laser scanning microscopy takes things to another level,” Paul says. “We hit the sample with lasers to make it fluoresce, and eliminate out of focus light so we can see a much crisper image of the specimens.”
+
+“With the help of colleagues from Cambridge’s Sainsbury Laboratory, we were able to take this another step further by combining this with a process known as fluorescence lifetime imaging microscopy, or FLIM. By measuring how long it takes the fluorescence of the samples to decay, we get an idea about the chemical structure of different parts of the fossil.”
+
+Imágenes de microscopio de los arbúsculos, que muestran las estructuras fúngicas que crecen dentro de la planta.
+Microscope images of the fossils show the bush-like structure of the fungus’s arbuscules and the web of hyphae connecting them. © Raymond Wightman
+
+Delving into an ancient relationship
+This study is the first time that a combination of confocal microscopy and FLIM has been used on fossils, and it’s revealed their structure in unprecedented detail.
+
+Using the images, the team were able to identify signs of Rugososporomyces lavoisierae growing within a plant known as Aglaophyton majus. In modern plants the mycorrhiza would normally be found in the roots, but Aglaophyton didn’t have any.
+
+“Very few plants had roots at this point in time,” Christine says. “Instead, they had small hair-like growths called rhizoids. So, even though mycorrhiza translates as ‘fungus root’, we found it in parts of the plant growing above the soil.”
+
+“Today, this type of association is only seen in some liverworts and hornworts. We need to understand why this changed.”
+
+Comprender mejor este proceso implicará profundizar en cómo evolucionó inicialmente la relación simbiótica entre plantas y hongos. Por ejemplo, actualmente no está claro si esta relación comenzó en el agua o cuando tanto las plantas como los hongos se trasladaron a la tierra.
+
+Estudios sobre algas verdes de agua dulce, los parientes vivos más cercanos de las plantas, muestran que poseen algunos de los genes que permitirían una relación simbiótica, pero no todos. Esto sugiere que los ancestros de las plantas podrían haber desarrollado los demás genes tras separarse de las algas. Sin embargo, esta pregunta sigue abierta.
+
+Otro gran enigma es cómo las plantas y los hongos aprendieron a interactuar. Un hongo que invade una planta normalmente provocaría una respuesta inmunitaria, mediante la cual la planta establece barreras químicas, pero los hongos simbióticos debilitan estas defensas.
+
+El equipo espera que los restos de estas barreras se hayan podido conservar en los fósiles de los sílex de Rhynie y Windyfield, ofreciendo así nuevos conocimientos sobre los cambios que llevaron a que las micorrizas se volvieran tan comunes.
+
+“Hasta ahora, nadie ha analizado la respuesta inmunitaria en plantas fósiles tan antiguas”, afirma Paul. “Pero es muy posible que las señales sigan presentes, incluso 400 millones de años después”.
+
+“Sería una primicia mundial si pudiéramos detectarlo, y nos daría una visión sin precedentes de la coevolución de plantas y hongos”.
+
+Leer más
+Lea el artículo completo publicado en New Phytologistabre en una nueva ventana.
+Descubra en qué está trabajando Christine .
+
+Protegiendo nuestro planeta
+Estamos trabajando para lograr un futuro en el que tanto las personas como el planeta prosperen.
+
+Escuche a los científicos que estudian el impacto humano y el cambio en el mundo natural.
+
+El momento es ahora
+
+13
+Evolución
+fósiles
+Investigación en museos
+Prehistórico
+Plantas
+Nueva especie
+Publicaciones relacionadas
+
+Noticias científicas
+
+Se revelan los orígenes del hongo parásito que inspiró The Last of Us
+Dos nuevas especies de hongos antiguos están arrojando luz sobre los orígenes de estos parásitos mortales.
+
+19 de junio de 2025
+
+Noticias
+
+La contaminación y la deforestación empujan a los hongos hacia la extinción
+Cientos de especies de hongos se han añadido a la última Lista Roja de conservación.
+
+3 de abril de 2025
+
+Noticias científicas
+
+El hongo que lleva el nombre de Beatrix Potter es una de las primeras plagas de las plantas.
+El hongo causante de enfermedades más antiguo registrado se ha encontrado en la colección del Museo de Historia Natural.
+
+5 de diciembre de 2023
+
+Noticias científicas
+
+Especies de bacterias antiguas entre las primeras de su tipo en colonizar la tierra
+Una especie de bacteria que vivió hace 407 millones de años habría florecido entre las primeras plantas terrestres.
+
+8 de septiembre de 2023
+No te pierdas nada
+Reciba actualizaciones por correo electrónico sobre nuestras noticias, ciencia, exposiciones, eventos, productos, servicios y actividades de recaudación de fondos. Ocasionalmente, podemos incluir contenido de terceros de nuestros socios corporativos y otros museos. No compartiremos sus datos personales con estos terceros. Debe ser mayor de 13 años. Aviso de privacidad .
+
+Nombre de pila *
+Nombre de pila
+Apellido *
+Apellido
+Dirección de correo electrónico *
+Dirección de correo electrónico
+
+Inscribirse
+Síguenos en las redes sociales
+El Museo de Historia Natural de Londres
+Abierto todos los días de 10:00 a 17:50
+
+Cerrado del 24 al 26 de diciembre
+
+Carretera de Cromwell
+
+Londres SW7 5BD
+
+El Museo de Historia Natural de Tring
+Abierto de martes a domingo y festivos.
+
+
+10:00-17:00 (última entrada 16:00)
+
+Cerrado del 24 al 26 de diciembre
+
+Calle Akeman
+
+Tring
+
+Hertfordshire HP23 6AP
+
+Visita
+Visita
+¿Qué hay?
+Mapa de galerías y museos
+Acceso
+Descubrir
+Descubrir
+Noticias
+Antropoceno
+Fauna británica
+Historias del museo
+Dinosaurios
+evolución humana
+Océanos
+Espacio
+¿Qué diablos?
+Para escuelas
+Para escuelas
+Visitando South Kensington
+Visitando Tring
+Recursos de aprendizaje
+Carreras
+Carreras
+Vacantes actuales
+Únete y apoya
+Únete y apoya
+Afiliación
+Membresía de regalo
+Haz una donación
+Conviértete en mecenas
+Asociaciones corporativas
+Participar
+Participar
+Actividades para todos
+Identificar la naturaleza
+Monitorear la naturaleza local
+Encuentra tu acción climática
+Voluntario
+Sobre nosotros
+Sobre nosotros
+Oficina de prensa
+Gobernancia
+Contáctanos
+Tienda online
+Tienda online
+Juguetes de dinosaurios
+Impresiones de vida silvestre a medida
+Libros relacionados con los museos
+Nuestra ciencia
+Nuestra ciencia
+Investigación
+Colecciones
+Conjuntos de datos
+Gente
+Instalaciones
+Estudio y eventos
+Biblioteca y Archivos
+Servicios empresariales
+Servicios empresariales
+Exposiciones itinerantes
+Consultante
+Publicación
+Lugares de rodaje de películas
+Imágenes del NHM
+Alquiler de local
+Licencias
+Legal
+Preferencias de cookies
+Aviso de privacidad
+Declaración de accesibilidad del sitio web
+Términos y condiciones
+Declaración sobre la esclavitud moderna
+© Los Fideicomisarios del Museo de Historia Natural de Londres
+
+Ancient fossil reveals how plants and fungi first developed on land | Natural History Museum

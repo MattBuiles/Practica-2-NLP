@@ -1,0 +1,7 @@
+Notas:
+
+- Guía 1: Cálculos con resistencias (Correo)
+- Guía 2: Conexiones en serie y paralelo (Correo)
+- Guía 3: Primeros Códigos Arduino 1 (Correo)
+- Levitador: Vídeos y Código (Correo)
+- Carrito: Videos (WhatsApp)
