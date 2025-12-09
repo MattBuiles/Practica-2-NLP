@@ -4,8 +4,7 @@ Genera respuestas basadas en contexto de forma inteligente y adaptativa.
 """
 import logging
 from typing import Dict, Any, List
-from langgraph.prebuilt import create_react_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import create_agent
 
 from src.config.llm_config import llm_config
 from src.tools import RAG_TOOLS
@@ -55,21 +54,20 @@ class AutonomousRAGAgent:
         self.tools = RAG_TOOLS
         
         # Prompt del sistema
-        self.prompt = self._create_agent_prompt()
+        self.system_prompt = self._create_system_prompt()
         
-        # Crear agente con langgraph (retorna un grafo ejecutable)
-        self.agent_executor = create_react_agent(
+        # Crear agente con langchain (retorna un grafo ejecutable)
+        self.agent_executor = create_agent(
             model=self.llm,
             tools=self.tools,
-            prompt=self.prompt
+            system_prompt=self.system_prompt
         )
         
         logger.info(f"AutonomousRAGAgent inicializado con {len(self.tools)} tools")
     
-    def _create_agent_prompt(self) -> ChatPromptTemplate:
+    def _create_system_prompt(self) -> str:
         """Crea el prompt del sistema para el agente RAG."""
-        return ChatPromptTemplate.from_messages([
-            ("system", """Eres un Agente RAG Autónomo experto en generación de respuestas contextuales.
+        return """Eres un Agente RAG Autónomo experto en generación de respuestas contextuales.
 
 TU MISIÓN:
 Generar una respuesta apropiada para la consulta del usuario, usando documentos si están disponibles.
@@ -163,14 +161,7 @@ IMPORTANTE:
 - NO generes respuestas manualmente, USA las tools
 - Elige la tool correcta según intent y disponibilidad de documentos
 - Registra siempre tus acciones
-- Las tools ya manejan citas y formato"""),
-            ("placeholder", "{agent_scratchpad}"),
-            ("human", """Query: {query}
-Intent: {intent}
-Documentos disponibles: {num_documents}
-
-Genera la respuesta apropiada usando las tools.""")
-        ])
+- Las tools ya manejan citas y formato"""
     
     def generate(self, query: str, documents: List[Dict[str, Any]], intent: str = "busqueda") -> Dict[str, Any]:
         """

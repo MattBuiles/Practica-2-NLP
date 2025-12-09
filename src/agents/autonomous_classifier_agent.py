@@ -4,8 +4,7 @@ Usa LangChain agent con capacidad de usar herramientas de forma autónoma.
 """
 import logging
 from typing import Dict, Any
-from langgraph.prebuilt import create_react_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import create_agent
 
 from src.config.llm_config import llm_config
 from src.tools import CLASSIFIER_TOOLS, classify_intent, log_agent_decision
@@ -54,18 +53,18 @@ class AutonomousClassifierAgent:
         self.tools = CLASSIFIER_TOOLS
         
         # Prompt del sistema para el agente
-        self.prompt = self._create_agent_prompt()
+        self.system_prompt = self._create_system_prompt()
         
-        # Crear agente con langgraph (retorna un grafo ejecutable)
-        self.agent_executor = create_react_agent(
+        # Crear agente con langchain (retorna un grafo ejecutable)
+        self.agent_executor = create_agent(
             model=self.llm,
             tools=self.tools,
-            prompt=self.prompt
+            system_prompt=self.system_prompt
         )
         
         logger.info(f"AutonomousClassifierAgent inicializado con {len(self.tools)} tools")
     
-    def _create_agent_prompt(self) -> ChatPromptTemplate:
+    def _create_system_prompt(self) -> str:
         """
         Crea el prompt del sistema para el agente autónomo.
         
@@ -75,8 +74,7 @@ class AutonomousClassifierAgent:
         - Proporcionar ejemplos de razonamiento
         - Establecer el formato de salida esperado
         """
-        return ChatPromptTemplate.from_messages([
-            ("system", """Eres un Agente Clasificador Autónomo experto en análisis de intenciones.
+        return """Eres un Agente Clasificador Autónomo experto en análisis de intenciones.
 
 TU MISIÓN:
 Clasificar la intención del usuario en una de 4 categorías:
@@ -142,10 +140,7 @@ IMPORTANTE:
 - Sé preciso y confiable
 - Explica claramente tu razonamiento
 - Usa las tools cuando sea apropiado
-- No inventes información"""),
-            ("placeholder", "{agent_scratchpad}"),
-            ("human", "{input}")
-        ])
+- No inventes información"""
     
     def classify(self, query: str) -> Dict[str, Any]:
         """

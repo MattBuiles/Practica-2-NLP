@@ -4,8 +4,7 @@ Busca y optimiza la recuperación de documentos de forma inteligente.
 """
 import logging
 from typing import Dict, Any, List
-from langgraph.prebuilt import create_react_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import create_agent
 
 from src.config.llm_config import llm_config
 from src.tools import RETRIEVER_TOOLS
@@ -55,22 +54,21 @@ class AutonomousRetrieverAgent:
         # Tools disponibles
         self.tools = RETRIEVER_TOOLS
         
-        # Prompt del sistema
-        self.prompt = self._create_agent_prompt()
+        # Crear prompt del sistema
+        self.system_prompt = self._create_system_prompt()
         
-        # Crear agente con langgraph (retorna un grafo ejecutable)
-        self.agent_executor = create_react_agent(
+        # Crear agente con langchain (retorna un grafo ejecutable)
+        self.agent_executor = create_agent(
             model=self.llm,
             tools=self.tools,
-            prompt=self.prompt
+            system_prompt=self.system_prompt
         )
         
         logger.info(f"AutonomousRetrieverAgent inicializado con {len(self.tools)} tools")
     
-    def _create_agent_prompt(self) -> ChatPromptTemplate:
+    def _create_system_prompt(self) -> str:
         """Crea el prompt del sistema para el agente recuperador."""
-        return ChatPromptTemplate.from_messages([
-            ("system", """Eres un Agente Recuperador Autónomo experto en búsqueda semántica.
+        return """Eres un Agente Recuperador Autónomo experto en búsqueda semántica.
 
 TU MISIÓN:
 Recuperar los documentos más relevantes para responder la consulta del usuario.
@@ -156,10 +154,7 @@ IMPORTANTE:
 - Sé eficiente: no hagas más búsquedas de las necesarias
 - Adapta k (cantidad) según el tipo de intención
 - Registra tus acciones con log_agent_action
-- Explica tu razonamiento"""),
-            ("placeholder", "{agent_scratchpad}"),
-            ("human", "Query: {query}\nIntención: {intent}\n\nRecupera los documentos más relevantes.")
-        ])
+- Explica tu razonamiento"""
     
     def retrieve(self, query: str, intent: str = "busqueda", k: int = None) -> Dict[str, Any]:
         """

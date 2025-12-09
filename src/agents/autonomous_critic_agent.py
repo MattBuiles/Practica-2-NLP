@@ -4,8 +4,7 @@ Valida y verifica la calidad de respuestas generadas.
 """
 import logging
 from typing import Dict, Any, List
-from langgraph.prebuilt import create_react_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import create_agent
 
 from src.config.llm_config import llm_config
 from src.tools import CRITIC_TOOLS
@@ -55,21 +54,20 @@ class AutonomousCriticAgent:
         self.tools = CRITIC_TOOLS
         
         # Prompt del sistema para el agente
-        self.prompt = self._create_agent_prompt()
+        self.system_prompt = self._create_system_prompt()
         
-        # Crear agente con langgraph (retorna un grafo ejecutable)
-        self.agent_executor = create_react_agent(
+        # Crear agente con langchain (retorna un grafo ejecutable)
+        self.agent_executor = create_agent(
             model=self.llm,
             tools=self.tools,
-            prompt=self.prompt
+            system_prompt=self.system_prompt
         )
         
         logger.info(f"AutonomousCriticAgent inicializado con {len(self.tools)} tools")
     
-    def _create_agent_prompt(self) -> ChatPromptTemplate:
+    def _create_system_prompt(self) -> str:
         """Crea el prompt del sistema para el agente crítico."""
-        return ChatPromptTemplate.from_messages([
-            ("system", """Eres un Agente Crítico Autónomo experto en validación de respuestas RAG.
+        return """Eres un Agente Crítico Autónomo experto en validación rigurosa de respuestas.
 
 TU MISIÓN:
 Validar rigurosamente si una respuesta generada es confiable, está bien respaldada y libre de alucinaciones.
@@ -182,17 +180,7 @@ IMPORTANTE:
 - Sé RIGUROSO: ante la duda, invalida
 - Usa ambas tools cuando sea necesario
 - Proporciona feedback constructivo
-- Explica claramente por qué apruebas o rechazas"""),
-            ("placeholder", "{agent_scratchpad}"),
-            ("human", """Query original: {query}
-
-Respuesta a validar:
-{response}
-
-Número de documentos de contexto: {num_documents}
-
-Valida la respuesta rigurosamente.""")
-        ])
+- Explica claramente por qué apruebas o rechazas"""
     
     def validate(self, query: str, response: str, context_documents: List[Dict[str, Any]]) -> Dict[str, Any]:
         """

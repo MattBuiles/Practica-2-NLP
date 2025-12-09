@@ -150,32 +150,35 @@ class AutonomousOrchestrator:
             # DECISIÓN: ¿Requiere RAG?
             # ===============================
             if not requires_rag:
-                logger.info("\n[DECISIÓN] No requiere RAG → Respuesta directa")
+                logger.info("\n[DECISIÓN] No requiere RAG → Respuesta directa del Classifier")
                 
-                # Generar respuesta general sin documentos
-                generation_result = self.rag_agent.generate(
-                    query=query,
-                    documents=[],
-                    intent=intent
-                )
+                # El agente clasificador responde directamente para consultas generales
+                # Usa el razonamiento que ya hizo durante la clasificación
+                response_text = classification.get("response", classification.get("reasoning", ""))
+                
+                # Si no hay respuesta en la clasificación, es porque solo clasificó
+                # En ese caso, retornamos el razonamiento como respuesta
+                if not response_text or len(response_text) < 20:
+                    response_text = f"Consulta clasificada como '{intent}': {classification.get('reasoning', 'Consulta general que no requiere búsqueda en documentos.')}"
                 
                 trace["steps"].append({
                     "step": 2,
-                    "agent": "RAGAgent",
-                    "action": "Generar respuesta general",
-                    "result": {"used_rag": False}
+                    "agent": "ClassifierAgent",
+                    "action": "Responder consulta general directamente",
+                    "result": {"used_rag": False, "response_length": len(response_text)}
                 })
-                trace["agents_called"].append("RAGAgent")
+                # ClassifierAgent ya está en agents_called
                 
                 execution_time = (datetime.now() - start_time).total_seconds()
                 
                 logger.info("\n" + "="*80)
                 logger.info(f"✓ CONSULTA COMPLETADA (sin RAG) en {execution_time:.2f}s")
+                logger.info(f"  - Respondida directamente por ClassifierAgent")
                 logger.info("="*80)
                 
                 return {
                     "query": query,
-                    "response": generation_result["response"],
+                    "response": response_text,
                     "intent": intent,
                     "documents_used": 0,
                     "validation": {"is_valid": True, "confidence_score": 1.0},

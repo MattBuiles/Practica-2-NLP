@@ -7,8 +7,7 @@ gestión del índice vectorial.
 """
 import logging
 from typing import Dict, Any, Optional, List
-from langgraph.prebuilt import create_react_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import create_agent
 
 from src.config.llm_config import get_classifier_llm
 from src.tools.document_loader_tool import (
@@ -92,26 +91,26 @@ class AutonomousIndexerAgent:
         self.llm = get_classifier_llm()  # Gemini para razonamiento
         self.tools = INDEXER_TOOLS
         
-        # Crear prompt del agente
-        self.prompt = self._create_agent_prompt()
+        # Crear prompt del sistema
+        self.system_prompt = self._create_system_prompt()
         
-        # Crear agente con langgraph (retorna un grafo ejecutable)
-        self.agent_executor = create_react_agent(
+        # Crear agente con langchain (retorna un grafo ejecutable)
+        self.agent_executor = create_agent(
             model=self.llm,
             tools=self.tools,
-            prompt=self.prompt
+            system_prompt=self.system_prompt
         )
         
         logger.info("AutonomousIndexerAgent inicializado con 11 herramientas")
     
-    def _create_agent_prompt(self) -> ChatPromptTemplate:
+    def _create_system_prompt(self) -> str:
         """
-        Crea el prompt que guía las decisiones autónomas del agente.
+        Crea el prompt del sistema que guía las decisiones autónomas del agente.
         
         Returns:
-            ChatPromptTemplate configurado para indexación autónoma
+            str con el prompt del sistema para indexación autónoma
         """
-        system_message = """Eres un Agente Indexador Autónomo experto en procesamiento de documentos y creación de índices vectoriales.
+        return """Eres un Agente Indexador Autónomo experto en procesamiento de documentos y creación de índices vectoriales.
 
 **Tu Misión:**
 Indexar documentos de forma eficiente y robusta, tomando decisiones inteligentes sobre:
@@ -186,22 +185,10 @@ Indexar documentos de forma eficiente y robusta, tomando decisiones inteligentes
 - Los documentos son listas de Dict con 'content' y 'metadata'
 - Los chunks son similares pero con información de chunking
 
-Eres AUTÓNOMO: tú DECIDES qué herramientas usar y cuándo, basado en el contexto de la tarea."""
+Eres AUTÓNOMO: tú DECIDES qué herramientas usar y cuándo, basado en el contexto de la tarea.
 
-        human_message = """**Tarea de Indexación:**
-{input}
-
-**Información Adicional:**
-{agent_scratchpad}
-
-**Instrucciones:**
-Ejecuta la tarea de indexación usando las herramientas disponibles de forma autónoma e inteligente.
+Ejecuta las tareas de indexación usando las herramientas disponibles de forma autónoma e inteligente.
 Registra tus decisiones importantes con log_agent_decision y tus acciones con log_agent_action."""
-
-        return ChatPromptTemplate.from_messages([
-            ("system", system_message),
-            ("human", human_message)
-        ])
     
     def index_directory(self, 
                        directory_path: str,
