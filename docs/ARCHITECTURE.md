@@ -180,57 +180,116 @@ score = coherence*0.20 + alignment*0.30 + hallucination*0.25 +
 
 **Documentación completa**: Ver `docs/PERSONA_3_DOCUMENTATION.md`
 
-### 6. Agente Indexador (`indexer_agent.py`)
+### 6. Agente Indexador (`indexer_agent.py`) ✅ IMPLEMENTADO (Persona 2)
 
 **Responsabilidades**:
 - Carga de documentos (PDF, HTML, TXT)
 - Limpieza y normalización
 - Chunking inteligente
+- Generación de embeddings
 - Indexación en FAISS
+- Persistencia de índices
 
 **Pipeline**:
 ```
-Documentos → Limpiar → Chunkear → Embeddear → Indexar FAISS
+Documentos → Cargar → Limpiar → Chunkear → Embeddear → Indexar FAISS → Guardar
 ```
 
-## Pipeline RAG
+**Componentes utilizados**:
+- PDFLoaderTool, HTMLLoaderTool, TextLoaderTool
+- TextCleanerTool
+- DocumentChunker
+- EmbeddingsManager
+- VectorStoreManager
 
-### Embeddings (`embeddings.py`)
+**Documentación completa**: Ver `docs/PERSONA_2_DOCUMENTATION.md`
+
+## Pipeline RAG ✅ IMPLEMENTADO (Persona 2)
+
+### Tools - Carga de Documentos
+
+**PDFLoaderTool** (`src/tools/pdf_loader.py`):
+- Extrae texto y metadatos de PDFs
+- Soporte para múltiples páginas
+- Manejo robusto de errores
+
+**HTMLLoaderTool** (`src/tools/html_loader.py`):
+- Parseo con BeautifulSoup
+- Limpieza de scripts y estilos
+- Extracción de título y contenido
+
+**TextLoaderTool** (`src/tools/text_loader.py`):
+- Detección automática de encoding
+- División en párrafos opcional
+- Soporte múltiples encodings
+
+**TextCleanerTool** (`src/tools/text_cleaner.py`):
+- Normalización de espacios
+- Remoción de caracteres de control
+- Limpieza agresiva opcional (URLs, emails)
+
+### Embeddings (`embeddings.py`) ✅ IMPLEMENTADO
 
 **Modelo**: `sentence-transformers/all-MiniLM-L6-v2`
 
 **Características**:
 - Dimensión: 384
-- Normalización: Sí
+- Normalización: Sí (para cosine similarity)
 - Device: CPU (configurable a GPU)
+- Procesamiento batch eficiente
+- Wrapper: HuggingFaceEmbeddings (LangChain)
 
-### Chunking (`chunking.py`)
+**Métodos**:
+- `embed_text()`: Embedding de texto individual
+- `embed_texts()`: Embeddings en batch
+- `embed_documents()`: Embeddings para documentos con metadata
 
-**Estrategia**: RecursiveCharacterTextSplitter
+### Chunking (`chunking.py`) ✅ IMPLEMENTADO
 
-**Parámetros**:
+**Estrategia**: RecursiveCharacterTextSplitter (LangChain)
+
+**Parámetros** (desde `settings.yaml`):
 - Chunk size: 1000 caracteres
 - Overlap: 200 caracteres
 - Separadores: `["\n\n", "\n", ". ", " ", ""]`
 
 **Metadata por chunk**:
-- Índice de chunk
-- Total de chunks del documento
-- Documento original
-- Fuente
+- `chunk_index`: Índice del chunk
+- `total_chunks_in_doc`: Total de chunks del documento
+- `original_doc_index`: Índice del documento original
+- `chunk_size`: Tamaño en caracteres
+- Metadatos originales preservados
 
-### Vector Store (`vectorstore.py`)
+### Vector Store (`vectorstore.py`) ✅ IMPLEMENTADO
 
-**Tecnología**: FAISS
+**Tecnología**: FAISS (Facebook AI Similarity Search)
+
+**Wrapper**: LangChain FAISS (`langchain_community.vectorstores.FAISS`)
 
 **Tipo de índice**: L2 (Euclidean distance)
 
 **Funcionalidades**:
-- Creación de índice
-- Adición de documentos
-- Búsqueda por similitud
-- Persistencia en disco
-- Carga de índice existente
+- `create_index()`: Crear índice desde documentos con embeddings
+- `similarity_search()`: Búsqueda por similitud con scores
+- `save_index()`: Persistencia en disco
+- `load_index()`: Carga de índice existente
+- `add_documents()`: Indexación incremental
+- `get_index_stats()`: Estadísticas del índice
+
+**Persistencia**: Guardado en `data/vectorstore/faiss_index/`
+
+### RAGPipeline (`pipelines.py`) ✅ IMPLEMENTADO
+
+**Orquestador de alto nivel** que integra:
+- IndexerAgent: Para indexación completa
+- VectorStoreManager: Para búsqueda semántica
+
+**Métodos principales**:
+- `index_directory()`: Indexa documentos desde directorio
+- `load_existing_index()`: Carga índice FAISS existente
+- `query()`: Búsqueda semántica
+- `get_index_stats()`: Estadísticas
+- `add_documents()`: Indexación incremental
 
 ## Sistema de Trazabilidad
 

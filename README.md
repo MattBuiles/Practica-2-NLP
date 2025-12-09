@@ -20,14 +20,15 @@
 - ✅ Ciclo de realimentación completo
 - ✅ Documentación técnica exhaustiva
 
-### 🟡 Persona 2: Ingestión y Vector Store (PENDIENTE)
+### ✅ Persona 2: Ingestión y Vector Store (IMPLEMENTADO)
 
-**Componentes como Stubs:**
-- 🟡 VectorStoreManager (FAISS)
-- 🟡 EmbeddingsManager
-- 🟡 RAG Pipeline (embeddings, chunking)
-- 🟡 Tools (loaders, cleaners)
-- 🟡 IndexerAgent
+**Componentes Completados:**
+- ✅ VectorStoreManager (FAISS) - Búsqueda semántica eficiente
+- ✅ EmbeddingsManager - Generación de embeddings con sentence-transformers
+- ✅ RAG Pipeline - Orquestación completa de indexación y búsqueda
+- ✅ Tools - Loaders (PDF, HTML, TXT) y TextCleaner
+- ✅ DocumentChunker - Chunking inteligente con overlap
+- ✅ IndexerAgent - Pipeline completo de indexación
 
 ## 🎯 Funcionalidad Actual (Persona 1)
 
@@ -116,7 +117,7 @@ Respuesta Final
 3. **Orchestrator** → Routing según intención
 4. **Trazabilidad** → Registra cada paso
 
-**Nota:** Los pasos RAG (recuperación, generación, validación) están como stubs para Persona 2/3.
+**Nota:** Todos los componentes están implementados. Persona 2 maneja la indexación y Persona 3 maneja la recuperación, generación y validación.
 
 ```
 Practica-2-NLP/
@@ -194,10 +195,13 @@ python main.py --batch queries.txt
 - Detecta alucinaciones
 - Regenera si es necesario
 
-### 5. Indexador
-- Carga documentos
-- Chunking inteligente
+### 5. Indexador (Persona 2)
+- Carga documentos (PDF, HTML, TXT)
+- Limpieza y normalización de texto
+- Chunking inteligente con overlap
+- Generación de embeddings
 - Indexación en FAISS
+- Persistencia de índices
 
 ## 📊 Ejemplos de Uso
 
@@ -274,7 +278,9 @@ pip install -r requirements.txt --upgrade
 ## 👥 Autores
 
 Práctica 3 - Procesamiento de Lenguaje Natural
-Persona 1: Arquitectura, Orquestador y Clasificador
+- Persona 1: Arquitectura, Orquestador y Clasificador
+- Persona 2: Ingestión, Limpieza, Embeddings y Vector Store
+- Persona 3: Recuperación, Generación y Validación
 
 ## 📄 Licencia
 
