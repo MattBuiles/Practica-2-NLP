@@ -125,6 +125,13 @@ class AutonomousOrchestrator:
         """Genera el prompt para decisiones de orquestación."""
         return """Eres un orquestador experto de sistemas RAG. Tu tarea es decidir la mejor estrategia para procesar consultas.
 
+IMPORTANTE - FORMATO DE RESPUESTA:
+- strategy: string (uno de: direct_response, simple_rag, comparison_rag, summary_rag, multi_hop)
+- num_documents: INTEGER (número entero como 0, 3, 5, 8 - NO usar strings como "5")
+- retrieval_mode: string (uno de: none, standard, comparison, summary)
+- needs_validation: BOOLEAN (true o false sin comillas - NO usar strings como "true")
+- reasoning: string (tu explicación)
+
 ESTRATEGIAS DISPONIBLES:
 
 1. **direct_response**: Respuesta directa sin RAG (conversación, saludos, preguntas generales)
@@ -133,29 +140,29 @@ ESTRATEGIAS DISPONIBLES:
    - needs_validation: false
 
 2. **simple_rag**: Búsqueda simple de información específica
-   - num_documents: 3-5
+   - num_documents: 4 o 5
    - retrieval_mode: standard
    - needs_validation: true
 
 3. **comparison_rag**: Comparación entre 2+ conceptos/documentos
-   - num_documents: 4-6
+   - num_documents: 5 o 6
    - retrieval_mode: comparison
    - needs_validation: true
 
 4. **summary_rag**: Resumen de documentos
-   - num_documents: 8-10
+   - num_documents: 8 o 10
    - retrieval_mode: summary
    - needs_validation: true
 
 5. **multi_hop**: Preguntas complejas que requieren múltiples consultas
-   - num_documents: 5-8
+   - num_documents: 6 o 8
    - retrieval_mode: standard
    - needs_validation: true
 
 CRITERIOS DE DECISIÓN:
 - Analiza la complejidad y contexto de la consulta
 - Optimiza el número de documentos (más no siempre es mejor)
-- Valida respuestas técnicas/médicas, no conversaciones simples
+- Valida respuestas técnicas, no conversaciones simples
 - Considera la intención clasificada pero usa tu criterio
 
 Responde SOLO con los campos del modelo OrchestrationDecision.

@@ -34,7 +34,7 @@ class LLMConfig:
         Usa Gemini por su superior capacidad de interpretación contextual.
         """
         return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash-lite",
+            model="gemini-2.5-flash",
             google_api_key=self.gemini_api_key,
             temperature=0.1,  # Baja temperatura para clasificación consistente
             max_tokens=500
@@ -69,11 +69,11 @@ class LLMConfig:
         LLM para el Agente Crítico/Verificador.
         Usa Gemini por su capacidad de razonamiento profundo.
         """
-        return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash-lite",
-            google_api_key=self.gemini_api_key,
-            temperature=0.1,
-            max_tokens=1500
+        return ChatGroq(
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            groq_api_key=self.groq_api_key,
+            temperature=0.3,
+            max_tokens=2000
         )
     
     def get_orchestrator_llm(self):

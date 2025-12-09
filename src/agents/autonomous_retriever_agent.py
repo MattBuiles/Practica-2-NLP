@@ -81,89 +81,56 @@ class AutonomousRetrieverAgent:
 
 TU MISIÓN:
 Recuperar los documentos más relevantes para responder la consulta del usuario.
+USA SIEMPRE LA QUERY EXACTA QUE TE DAN - NO la reemplaces con ejemplos.
 
 HERRAMIENTAS DISPONIBLES:
 - search_documents(query, k, score_threshold): Busca documentos por similitud
-  - query: La consulta de búsqueda
+  - query: USA LA QUERY EXACTA DEL USUARIO, no ejemplos
   - k: Número de documentos (3-10 según contexto)
-  - score_threshold: Umbral de relevancia (0.0 = todos, 0.5+ = solo muy relevantes)
+  - score_threshold: Umbral de relevancia (0.0 = todos)
 
 - optimize_search_query(query, intent): Optimiza la query para mejor recuperación
+  - USA LA QUERY DEL USUARIO como entrada
   - Expande con sinónimos y términos relacionados
-  - Mejora queries vagas o cortas
 
 - search_documents_by_metadata(metadata_filter, k): Busca por filtros específicos
-  - Útil cuando el usuario menciona un documento concreto
 
 - log_agent_action: Registra tus acciones
 
 ESTRATEGIA DE RECUPERACIÓN:
 
 1. **PARA BÚSQUEDA SIMPLE** (intent="busqueda"):
-   - Considera optimizar la query si es vaga o corta
-   - Recupera 3-5 documentos
-   - Usa score_threshold=0.0 para queries específicas
+   - USA LA QUERY EXACTA del usuario
+   - Recupera 4-5 documentos
+   - Usa score_threshold=0.0
 
 2. **PARA RESUMEN** (intent="resumen"):
-   - Optimiza la query para ampliar términos
-   - Recupera 8-10 documentos para cobertura amplia
-   - Usa score_threshold=0.0 para incluir diversidad
+   - USA LA QUERY del usuario, puedes optimizarla
+   - Recupera 8-10 documentos
+   - Usa score_threshold=0.0
 
 3. **PARA COMPARACIÓN** (intent="comparacion"):
-   - Identifica los 2+ conceptos a comparar
-   - Haz búsquedas separadas para cada concepto si es necesario
-   - Recupera 4-6 documentos en total
+   - USA LA QUERY del usuario
+   - Recupera 5-6 documentos
    - Asegura balance entre conceptos
 
-4. **DECISIÓN DE OPTIMIZACIÓN**:
-   - Optimiza SI: query es corta (<5 palabras), vaga, o ambigua
-   - NO optimices SI: query ya es específica y clara
+IMPORTANTE:
+- SIEMPRE usa la query que recibes del usuario
+- NUNCA uses ejemplos como query de búsqueda
+- La query viene en el mensaje del usuario, úsala directamente
 
-EJEMPLOS:
-
-Ejemplo 1 - Búsqueda simple:
-Query: "¿Qué es la diabetes?"
-Razonamiento: "Query clara y específica. Busco directamente sin optimizar."
-Acciones:
-1. search_documents("¿Qué es la diabetes?", k=4, score_threshold=0.0)
-2. log_agent_action(...)
-
-Ejemplo 2 - Búsqueda vaga:
-Query: "covid"
-Razonamiento: "Query muy corta. Optimizo primero para mejores resultados."
-Acciones:
-1. optimize_search_query("covid", "busqueda")
-2. search_documents(query_optimizada, k=4, score_threshold=0.0)
-3. log_agent_action(...)
-
-Ejemplo 3 - Comparación:
-Query: "Diferencias entre diabetes tipo 1 y tipo 2"
-Razonamiento: "Comparación de dos conceptos. Busco ambos en una query."
-Acciones:
-1. optimize_search_query(query, "comparacion")
-2. search_documents(query_optimizada, k=6, score_threshold=0.0)
-3. log_agent_action(...)
-
-Ejemplo 4 - Resumen:
-Query: "Resume información sobre tratamientos del cáncer"
-Intent: "resumen"
-Razonamiento: "Resumen requiere cobertura amplia. Recupero más documentos."
-Acciones:
-1. optimize_search_query(query, "resumen")
-2. search_documents(query_optimizada, k=10, score_threshold=0.0)
-3. log_agent_action(...)
+INSTRUCCIÓN CRÍTICA:
+Cuando recibas una query como "Busca documentos para: ¿Cuáles fueron los dinosaurios más grandes?"
+DEBES buscar exactamente "¿Cuáles fueron los dinosaurios más grandes?" - NO otros términos.
 
 FORMATO DE RESPUESTA FINAL:
 Después de recuperar documentos, responde:
-"He recuperado [N] documentos relevantes para la consulta."
-
-Los documentos recuperados estarán disponibles automáticamente.
+"He recuperado [N] documentos relevantes."
 
 IMPORTANTE:
+- USA LA QUERY EXACTA del usuario, no inventes otra
 - Sé eficiente: no hagas más búsquedas de las necesarias
-- Adapta k (cantidad) según el tipo de intención
-- Registra tus acciones con log_agent_action
-- Explica tu razonamiento"""
+- Adapta k según la intención"""
     
     def retrieve(self, query: str, intent: str = "busqueda", k: int = None) -> Dict[str, Any]:
         """
@@ -194,45 +161,64 @@ IMPORTANTE:
         try:
             logger.info(f"[AutonomousRetriever] Query: '{query[:80]}', intent: {intent}")
             
-            # Preparar input para el agente
-            agent_input = {
-                "query": query,
-                "intent": intent
-            }
-            
-            # Si se especifica k, agregarlo al contexto
+            # Preparar mensaje para el agente - enfatizar la query real
             if k is not None:
-                agent_input["input"] = f"Query: {query}\nIntención: {intent}\nRecupera exactamente {k} documentos."
+                user_message = f"""BUSCA DOCUMENTOS PARA ESTA QUERY EXACTA:
+Query: {query}
+Intención: {intent}
+Número de documentos requeridos: {k}
+
+USA EXACTAMENTE la query "{query}" para buscar, no otra."""
             else:
-                agent_input["input"] = f"Query: {query}\nIntención: {intent}\nRecupera los documentos más relevantes."
+                user_message = f"""BUSCA DOCUMENTOS PARA ESTA QUERY EXACTA:
+Query: {query}
+Intención: {intent}
+
+USA EXACTAMENTE la query "{query}" para buscar, no otra."""
             
-            # Ejecutar agente
-            result = self.agent_executor.invoke(agent_input)
+            # Invocar agente con formato LangChain 1.1
+            result = self.agent_executor.invoke({
+                "messages": [
+                    {"role": "user", "content": user_message}
+                ]
+            })
             
-            # Extraer documentos de los pasos intermedios
+            # Extraer documentos del nuevo formato de mensajes
+            messages = result.get("messages", [])
             documents = []
-            steps = result.get("intermediate_steps", [])
+            tool_calls = []
             
-            for step in steps:
-                if hasattr(step[0], 'tool') and 'search_documents' in step[0].tool:
-                    # Extraer documentos del resultado de la búsqueda
-                    search_result = step[1]
-                    if isinstance(search_result, list):
-                        documents.extend(search_result)
+            for msg in messages:
+                # Procesar AIMessage con tool_calls
+                if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                    tool_calls.extend(msg.tool_calls)
+                # Procesar ToolMessage (resultados de búsqueda)
+                elif hasattr(msg, 'tool_call_id') and hasattr(msg, 'content'):
+                    try:
+                        import json
+                        tool_result = json.loads(msg.content) if isinstance(msg.content, str) else msg.content
+                        # Si es una lista de documentos, agregarlos
+                        if isinstance(tool_result, list):
+                            documents.extend(tool_result)
+                        elif isinstance(tool_result, dict) and 'documents' in tool_result:
+                            documents.extend(tool_result['documents'])
+                    except json.JSONDecodeError:
+                        pass
+                    except Exception:
+                        pass
             
             logger.info(f"[AutonomousRetriever] Recuperados {len(documents)} documentos")
             
             return {
                 "documents": documents,
-                "query_used": query,  # Podría ser optimizada
+                "query_used": query,
                 "count": len(documents),
                 "intermediate_steps": [
                     {
-                        "tool": step[0].tool if hasattr(step[0], 'tool') else "reasoning",
-                        "input": str(step[0].tool_input if hasattr(step[0], 'tool_input') else "")[:100],
-                        "output_preview": str(step[1])[:150]
+                        "tool": tc.get("name", "unknown") if isinstance(tc, dict) else getattr(tc, 'name', 'unknown'),
+                        "input": str(tc.get("args", {}) if isinstance(tc, dict) else getattr(tc, 'args', {}))[:100]
                     }
-                    for step in steps
+                    for tc in tool_calls
                 ]
             }
             
