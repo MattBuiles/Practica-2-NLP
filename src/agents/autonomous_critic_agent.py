@@ -5,11 +5,21 @@ Valida y verifica la calidad de respuestas generadas.
 import logging
 from typing import Dict, Any, List
 from langchain.agents import create_agent
+from pydantic import BaseModel, Field
 
 from src.config.llm_config import llm_config
 from src.tools import CRITIC_TOOLS
 
 logger = logging.getLogger(__name__)
+
+
+class ValidationResult(BaseModel):
+    """Modelo de salida estructurada para validación crítica."""
+    is_valid: bool = Field(description="Si la respuesta es válida")
+    confidence_score: float = Field(description="Puntuación de confianza (0.0 a 1.0)")
+    needs_regeneration: bool = Field(description="Si requiere regeneración")
+    issues: List[str] = Field(description="Lista de problemas detectados")
+    feedback: str = Field(description="Feedback detallado para mejora")
 
 
 class AutonomousCriticAgent:
@@ -214,30 +224,47 @@ IMPORTANTE:
         try:
             logger.info(f"[AutonomousCritic] Validando respuesta ({len(response)} chars) vs {len(context_documents)} docs")
             
-            # Preparar input
-            agent_input = {
-                "query": query,
-                "response": response,
-                "num_documents": len(context_documents),
-                "input": f"Query original: {query}\n\nRespuesta a validar:\n{response}\n\nNúmero de documentos de contexto: {len(context_documents)}"
-            }
+            # Preparar mensaje para el agente
+            user_message = f"Query original: {query}\n\nRespuesta a validar:\n{response}\n\nNúmero de documentos de contexto: {len(context_documents)}\n\nValida la respuesta y determina si es correcta."
             
-            # Ejecutar agente
-            result = self.agent_executor.invoke(agent_input)
+            # Ejecutar agente con formato LangChain 1.1
+            result = self.agent_executor.invoke({
+                "messages": [
+                    {"role": "user", "content": user_message}
+                ]
+            })
             
-            # Extraer validación de los steps
-            steps = result.get("intermediate_steps", [])
-            output = result.get("output", "")
+            # Extraer validación del nuevo formato de mensajes
+            messages = result.get("messages", [])
+            output = ""
+            tool_results = []
+            tool_calls = []
             
-            validation_result = self._extract_validation_from_steps(steps, output)
+            for msg in messages:
+                # AIMessage con tool_calls
+                if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                    tool_calls.extend(msg.tool_calls)
+                # AIMessage con respuesta final
+                elif hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
+                    output = msg.content
+                # ToolMessage con resultados
+                elif hasattr(msg, 'tool_call_id') and hasattr(msg, 'content'):
+                    try:
+                        import json
+                        tool_result = json.loads(msg.content) if isinstance(msg.content, str) else msg.content
+                        tool_results.append(tool_result)
+                    except:
+                        tool_results.append({"content": msg.content})
+            
+            validation_result = self._extract_validation_from_results(tool_results, output)
             
             # Agregar steps para trazabilidad
             validation_result["intermediate_steps"] = [
                 {
-                    "tool": step[0].tool if hasattr(step[0], 'tool') else "reasoning",
-                    "result_preview": str(step[1])[:200]
+                    "tool": tc.get("name", "unknown") if isinstance(tc, dict) else getattr(tc, 'name', 'unknown'),
+                    "result_preview": str(tr)[:200] if tr else ""
                 }
-                for step in steps
+                for tc, tr in zip(tool_calls, tool_results + [None] * len(tool_calls))
             ]
             
             logger.info(f"[AutonomousCritic] Validación: valid={validation_result['is_valid']}, "
@@ -260,31 +287,29 @@ IMPORTANTE:
                 "intermediate_steps": []
             }
     
-    def _extract_validation_from_steps(self, steps: list, output: str) -> Dict[str, Any]:
+    def _extract_validation_from_results(self, tool_results: list, output: str) -> Dict[str, Any]:
         """
-        Extrae resultado de validación de los steps del agente.
+        Extrae resultado de validación de los resultados de las tools.
         
         Args:
-            steps: Pasos intermedios ejecutados
+            tool_results: Resultados de las tools ejecutadas
             output: Output final del agente
             
         Returns:
             Diccionario con validación estructurada
         """
-        # Buscar resultado de validate_response en los steps
-        for step in steps:
-            if hasattr(step[0], 'tool') and step[0].tool == 'validate_response':
-                result = step[1]
-                if isinstance(result, dict):
-                    # Asegurarnos de que tiene todos los campos necesarios
-                    return {
-                        "is_valid": result.get("is_valid", False),
-                        "needs_regeneration": not result.get("is_valid", True),
-                        "confidence_score": result.get("confidence_score", 0.0),
-                        "issues": result.get("issues", []),
-                        "recommendations": result.get("recommendations", ""),
-                        "reasoning": output or "Validación completada por tool"
-                    }
+        # Buscar resultado de validate_response en los resultados
+        for result in tool_results:
+            if isinstance(result, dict) and 'is_valid' in result:
+                # Asegurarnos de que tiene todos los campos necesarios
+                return {
+                    "is_valid": result.get("is_valid", False),
+                    "needs_regeneration": not result.get("is_valid", True),
+                    "confidence_score": result.get("confidence_score", 0.0),
+                    "issues": result.get("issues", []),
+                    "recommendations": result.get("recommendations", ""),
+                    "reasoning": output or "Validación completada por tool"
+                }
         
         # Si no encontramos validate_response, parsear el output
         # Por defecto, ser conservador

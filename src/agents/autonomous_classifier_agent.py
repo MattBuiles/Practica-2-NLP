@@ -5,11 +5,20 @@ Usa LangChain agent con capacidad de usar herramientas de forma autónoma.
 import logging
 from typing import Dict, Any
 from langchain.agents import create_agent
+from pydantic import BaseModel, Field
 
 from src.config.llm_config import llm_config
 from src.tools import CLASSIFIER_TOOLS, classify_intent, log_agent_decision
 
 logger = logging.getLogger(__name__)
+
+
+class IntentClassification(BaseModel):
+    """Modelo de salida estructurada para clasificación de intención."""
+    intent: str = Field(description="Intención clasificada: busqueda, resumen, comparacion, general")
+    confidence: float = Field(description="Nivel de confianza (0.0 a 1.0)")
+    requires_rag: bool = Field(description="Si requiere búsqueda en vector store")
+    reasoning: str = Field(description="Justificación de la clasificación")
 
 
 class AutonomousClassifierAgent:
@@ -169,29 +178,51 @@ IMPORTANTE:
         try:
             logger.info(f"[AutonomousClassifier] Procesando: '{query[:100]}'")
             
-            # Invocar agente autónomo
+            # Invocar agente autónomo con formato LangChain 1.1
+            # El nuevo formato usa 'messages' como lista de mensajes
             result = self.agent_executor.invoke({
-                "input": f"Clasifica la siguiente consulta del usuario: {query}"
+                "messages": [
+                    {"role": "user", "content": f"Clasifica la siguiente consulta del usuario: {query}"}
+                ]
             })
             
-            # Extraer resultado
-            output = result.get("output", "")
-            intermediate_steps = result.get("intermediate_steps", [])
+            # Extraer resultado del nuevo formato (messages es una lista)
+            messages = result.get("messages", [])
             
-            logger.info(f"[AutonomousClassifier] Pasos intermedios: {len(intermediate_steps)}")
+            # Procesar los mensajes para extraer información
+            output = ""
+            tool_calls = []
+            tool_results = []
             
-            # Parsear output (el agente debe devolver formato estructurado)
-            # Por simplicidad, si el agente usó classify_intent, extraemos su resultado
-            classification = self._parse_agent_output(output, intermediate_steps)
+            for msg in messages:
+                # AIMessage con respuesta final
+                if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
+                    if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                        tool_calls.extend(msg.tool_calls)
+                    elif msg.content:
+                        output = msg.content
+                # ToolMessage con resultados
+                elif hasattr(msg, 'tool_call_id'):
+                    try:
+                        import json
+                        tool_result = json.loads(msg.content) if isinstance(msg.content, str) else msg.content
+                        tool_results.append(tool_result)
+                    except:
+                        tool_results.append({"content": msg.content})
+            
+            logger.info(f"[AutonomousClassifier] Tool calls: {len(tool_calls)}, Tool results: {len(tool_results)}")
+            
+            # Parsear output
+            classification = self._parse_agent_output(output, tool_results)
             
             # Agregar pasos intermedios para trazabilidad
             classification["intermediate_steps"] = [
                 {
-                    "action": step[0].tool if hasattr(step[0], 'tool') else "reasoning",
-                    "input": str(step[0].tool_input if hasattr(step[0], 'tool_input') else ""),
-                    "output": str(step[1])[:200]
+                    "action": tc.get("name", "unknown") if isinstance(tc, dict) else getattr(tc, 'name', 'unknown'),
+                    "input": str(tc.get("args", {}) if isinstance(tc, dict) else getattr(tc, 'args', {}))[:200],
+                    "output": str(tr)[:200] if tr else ""
                 }
-                for step in intermediate_steps
+                for tc, tr in zip(tool_calls, tool_results + [None] * len(tool_calls))
             ]
             
             logger.info(f"[AutonomousClassifier] Clasificado como: {classification['intent']}")
@@ -209,27 +240,21 @@ IMPORTANTE:
                 "intermediate_steps": []
             }
     
-    def _parse_agent_output(self, output: str, steps: list) -> Dict[str, Any]:
+    def _parse_agent_output(self, output: str, tool_results: list) -> Dict[str, Any]:
         """
         Parsea la salida del agente para extraer clasificación estructurada.
         
         Args:
             output: Salida final del agente
-            steps: Pasos intermedios ejecutados
+            tool_results: Resultados de las tools ejecutadas
             
         Returns:
             Diccionario con clasificación estructurada
         """
-        # Buscar si se usó classify_intent en los pasos
-        for step in steps:
-            if hasattr(step[0], 'tool') and step[0].tool == 'classify_intent':
-                # El resultado de classify_intent es directamente lo que necesitamos
-                try:
-                    result = step[1]  # Output de la tool
-                    if isinstance(result, dict):
-                        return result
-                except:
-                    pass
+        # Buscar si hay resultados de classify_intent en tool_results
+        for result in tool_results:
+            if isinstance(result, dict) and 'intent' in result:
+                return result
         
         # Si no se usó classify_intent, parsear el output del agente
         # Buscar palabras clave en el output

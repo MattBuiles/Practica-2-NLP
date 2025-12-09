@@ -1,24 +1,43 @@
 """
 Orquestador Autónomo con Agentes y Tools.
-Coordina el flujo completo del sistema usando agentes autónomos.
+Coordina el flujo completo del sistema usando agentes autónomos con decisiones LLM.
 """
 import logging
 from typing import Dict, Any
 from datetime import datetime
+from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
 
 from src.agents.autonomous_classifier_agent import AutonomousClassifierAgent
 from src.agents.autonomous_retriever_agent import AutonomousRetrieverAgent
 from src.agents.autonomous_rag_agent import AutonomousRAGAgent
 from src.agents.autonomous_critic_agent import AutonomousCriticAgent
+from src.config.llm_config import llm_config
+from src.rag_pipeline.vectorstore import vectorstore_manager
 
 logger = logging.getLogger(__name__)
+
+
+class OrchestrationDecision(BaseModel):
+    """Decisión del orquestador sobre cómo procesar la consulta."""
+    strategy: str = Field(description="Estrategia a seguir: direct_response, simple_rag, comparison_rag, summary_rag, multi_hop")
+    num_documents: int = Field(description="Número de documentos a recuperar (0 si no aplica)")
+    retrieval_mode: str = Field(description="Modo de recuperación: standard, comparison, summary, none")
+    needs_validation: bool = Field(description="Si requiere validación crítica")
+    reasoning: str = Field(description="Justificación de la decisión")
 
 
 class AutonomousOrchestrator:
     """
     Orquestador Autónomo del Sistema Agentic AI.
     
-    Coordina el flujo completo usando agentes autónomos que:
+    Usa LLM (Groq) para tomar decisiones inteligentes sobre:
+    - Estrategia de procesamiento óptima
+    - Número de documentos a recuperar
+    - Modo de recuperación según contexto
+    - Necesidad de validación crítica
+    
+    Coordina agentes autónomos que:
     - Toman sus propias decisiones
     - Usan tools cuando lo necesitan
     - Se comunican entre sí mediante sus outputs
@@ -28,22 +47,16 @@ class AutonomousOrchestrator:
     
     1. **Usuario** → Consulta
     2. **ClassifierAgent** → Clasifica intención (busqueda/resumen/comparacion/general)
-    3. **Decisión**:
-       - Si general → RAGAgent genera respuesta directa
-       - Si requiere RAG → Continuar flujo
-    4. **RetrieverAgent** → Recupera documentos relevantes
-    5. **RAGAgent** → Genera respuesta con contexto
-    6. **CriticAgent** → Valida respuesta
-    7. **Loop** (si necesario):
+    3. **Orchestrator LLM** → Decide estrategia óptima con salida estructurada
+    4. **Decisión basada en estrategia**:
+       - direct_response → RAGAgent responde directamente
+       - simple_rag/comparison_rag/summary_rag → Flujo RAG completo
+    5. **RetrieverAgent** → Recupera N documentos (según decisión LLM)
+    6. **RAGAgent** → Genera respuesta con contexto
+    7. **CriticAgent** → Valida (solo si needs_validation=true)
+    8. **Loop** (si necesario):
        - Si respuesta rechazada → RAGAgent regenera (máx 2 iteraciones)
-    8. **Usuario** ← Respuesta final + trazabilidad
-    
-    CARACTERÍSTICAS:
-    - Agentes completamente autónomos
-    - Trazabilidad detallada de cada paso
-    - Control de calidad con validación crítica
-    - Loop de regeneración controlado
-    - Manejo robusto de errores
+    9. **Usuario** ← Respuesta final + trazabilidad
     """
     
     def __init__(self):
@@ -51,13 +64,14 @@ class AutonomousOrchestrator:
         Inicializa el orquestador y todos los agentes autónomos.
         
         Crea instancias de:
-        - AutonomousClassifierAgent: Clasifica intenciones
-        - AutonomousRetrieverAgent: Recupera documentos
-        - AutonomousRAGAgent: Genera respuestas
-        - AutonomousCriticAgent: Valida respuestas
+        - AutonomousClassifierAgent: Clasifica intenciones con tools
+        - AutonomousRetrieverAgent: Recupera documentos con tools
+        - AutonomousRAGAgent: Genera respuestas con tools
+        - AutonomousCriticAgent: Valida respuestas con tools
+        - LLM de Orquestación: Decide estrategias con salida estructurada
         """
         logger.info("="*80)
-        logger.info("Inicializando AutonomousOrchestrator con Agentes Autónomos")
+        logger.info("Inicializando AutonomousOrchestrator con LLM de Decisión")
         logger.info("="*80)
         
         self.start_time = datetime.now()
@@ -75,14 +89,145 @@ class AutonomousOrchestrator:
         logger.info("\n[4/4] Inicializando CriticAgent...")
         self.critic = AutonomousCriticAgent()
         
+        # Cargar vectorstore
+        logger.info("\n[5/6] Cargando vector store...")
+        try:
+            vectorstore_manager.load_index()
+            if vectorstore_manager.vectorstore:
+                stats = vectorstore_manager.get_index_stats()
+                logger.info(f"✓ Vector store cargado: {stats.get('documents', 0)} documentos")
+            else:
+                logger.warning("⚠ Vector store no pudo cargarse - el sistema funcionará pero sin RAG")
+        except Exception as e:
+            logger.warning(f"⚠ Error cargando vector store: {e}")
+        
+        # LLM para decisiones de orquestación (salida estructurada)
+        logger.info("\n[6/6] Configurando LLM de Orquestación...")
+        self.llm = llm_config.get_orchestrator_llm()
+        self.structured_llm = self.llm.with_structured_output(OrchestrationDecision)
+        
+        # Prompt para decisiones
+        self.decision_prompt = ChatPromptTemplate.from_messages([
+            ("system", self._get_decision_prompt()),
+            ("user", "Consulta: {query}\nIntención: {intent}\nConfianza: {confidence}\nRequiere RAG: {requires_rag}")
+        ])
+        
         # Configuración
         self.max_regeneration_attempts = 2
         
         init_time = (datetime.now() - self.start_time).total_seconds()
         logger.info("="*80)
         logger.info(f"AutonomousOrchestrator inicializado en {init_time:.2f}s")
-        logger.info("Sistema listo con 4 agentes autónomos + 11 tools")
+        logger.info("Sistema listo: 4 agentes autónomos + LLM decisor + Vector Store")
         logger.info("="*80)
+    
+    def _get_decision_prompt(self) -> str:
+        """Genera el prompt para decisiones de orquestación."""
+        return """Eres un orquestador experto de sistemas RAG. Tu tarea es decidir la mejor estrategia para procesar consultas.
+
+ESTRATEGIAS DISPONIBLES:
+
+1. **direct_response**: Respuesta directa sin RAG (conversación, saludos, preguntas generales)
+   - num_documents: 0
+   - retrieval_mode: none
+   - needs_validation: false
+
+2. **simple_rag**: Búsqueda simple de información específica
+   - num_documents: 3-5
+   - retrieval_mode: standard
+   - needs_validation: true
+
+3. **comparison_rag**: Comparación entre 2+ conceptos/documentos
+   - num_documents: 4-6
+   - retrieval_mode: comparison
+   - needs_validation: true
+
+4. **summary_rag**: Resumen de documentos
+   - num_documents: 8-10
+   - retrieval_mode: summary
+   - needs_validation: true
+
+5. **multi_hop**: Preguntas complejas que requieren múltiples consultas
+   - num_documents: 5-8
+   - retrieval_mode: standard
+   - needs_validation: true
+
+CRITERIOS DE DECISIÓN:
+- Analiza la complejidad y contexto de la consulta
+- Optimiza el número de documentos (más no siempre es mejor)
+- Valida respuestas técnicas/médicas, no conversaciones simples
+- Considera la intención clasificada pero usa tu criterio
+
+Responde SOLO con los campos del modelo OrchestrationDecision.
+"""
+    
+    def _decide_strategy(self, query: str, classification: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Usa LLM para decidir la estrategia óptima de procesamiento.
+        
+        Args:
+            query: Consulta del usuario
+            classification: Clasificación de intención
+            
+        Returns:
+            Decisión de orquestación con salida estructurada
+        """
+        try:
+            logger.info("→ Usando LLM para decidir estrategia de orquestación...")
+            
+            messages = self.decision_prompt.format_messages(
+                query=query,
+                intent=classification["intent"],
+                confidence=classification["confidence"],
+                requires_rag=classification["requires_rag"]
+            )
+            
+            decision = self.structured_llm.invoke(messages)
+            
+            result = {
+                "strategy": decision.strategy,
+                "num_documents": decision.num_documents,
+                "retrieval_mode": decision.retrieval_mode,
+                "needs_validation": decision.needs_validation,
+                "reasoning": decision.reasoning
+            }
+            
+            logger.info(f"✓ Estrategia: {decision.strategy} | Docs: {decision.num_documents} | Validar: {decision.needs_validation}")
+            logger.info(f"  Razonamiento: {decision.reasoning[:150]}...")
+            return result
+            
+        except Exception as e:
+            logger.error(f"✗ Error en decisión LLM: {str(e)}")
+            logger.warning("→ Usando fallback basado en clasificación")
+            
+            # Fallback basado en clasificación
+            intent = classification["intent"]
+            requires_rag = classification["requires_rag"]
+            
+            if not requires_rag:
+                strategy = "direct_response"
+                num_docs = 0
+                mode = "none"
+            elif intent == "comparacion":
+                strategy = "comparison_rag"
+                num_docs = 5
+                mode = "comparison"
+            elif intent == "resumen":
+                strategy = "summary_rag"
+                num_docs = 8
+                mode = "summary"
+            else:
+                strategy = "simple_rag"
+                num_docs = 5
+                mode = "standard"
+            
+            return {
+                "strategy": strategy,
+                "num_documents": num_docs,
+                "retrieval_mode": mode,
+                "needs_validation": requires_rag,
+                "reasoning": f"Fallback basado en clasificación: {intent}"
+            }
     
     def process_query(self, query: str) -> Dict[str, Any]:
         """
@@ -147,39 +292,65 @@ class AutonomousOrchestrator:
             logger.info(f"✓ Intención: {intent} | Confianza: {classification['confidence']:.2f} | RAG: {requires_rag}")
             
             # ===============================
-            # DECISIÓN: ¿Requiere RAG?
+            # PASO 2: DECISIÓN DE ESTRATEGIA CON LLM
             # ===============================
-            if not requires_rag:
-                logger.info("\n[DECISIÓN] No requiere RAG → Respuesta directa del Classifier")
+            logger.info("\n[PASO 2] Decidiendo estrategia con LLM...")
+            decision = self._decide_strategy(query, classification)
+            
+            trace["steps"].append({
+                "step": 2,
+                "agent": "OrchestratorLLM",
+                "action": "Decidir estrategia",
+                "result": {
+                    "strategy": decision["strategy"],
+                    "num_documents": decision["num_documents"],
+                    "retrieval_mode": decision["retrieval_mode"],
+                    "needs_validation": decision["needs_validation"],
+                    "reasoning": decision["reasoning"]
+                }
+            })
+            trace["agents_called"].append("OrchestratorLLM")
+            
+            logger.info(f"✓ Estrategia: {decision['strategy']} | Documentos: {decision['num_documents']} | Modo: {decision['retrieval_mode']}")
+            
+            # ===============================
+            # DECISIÓN: Ejecutar según estrategia
+            # ===============================
+            if decision["strategy"] == "direct_response":
+                logger.info("\n[DECISIÓN] Estrategia: direct_response → Sin RAG")
+                logger.info("\n[DECISIÓN] Estrategia: direct_response → Sin RAG")
                 
-                # El agente clasificador responde directamente para consultas generales
-                # Usa el razonamiento que ya hizo durante la clasificación
-                response_text = classification.get("response", classification.get("reasoning", ""))
+                # Respuesta directa usando RAGAgent (sin contexto documental)
+                #TODO ACTUALIZAR A USAR CLASSIFIER
+                generation_result = self.rag_agent.generate(
+                    query=query,
+                    documents=[],
+                    intent=intent
+                )
                 
-                # Si no hay respuesta en la clasificación, es porque solo clasificó
-                # En ese caso, retornamos el razonamiento como respuesta
-                if not response_text or len(response_text) < 20:
-                    response_text = f"Consulta clasificada como '{intent}': {classification.get('reasoning', 'Consulta general que no requiere búsqueda en documentos.')}"
+                response_text = generation_result["response"]
                 
                 trace["steps"].append({
-                    "step": 2,
-                    "agent": "ClassifierAgent",
+                    "step": 3,
+                    "agent": "RAGAgent",
                     "action": "Responder consulta general directamente",
                     "result": {"used_rag": False, "response_length": len(response_text)}
                 })
-                # ClassifierAgent ya está en agents_called
+                trace["agents_called"].append("RAGAgent")
                 
                 execution_time = (datetime.now() - start_time).total_seconds()
                 
                 logger.info("\n" + "="*80)
                 logger.info(f"✓ CONSULTA COMPLETADA (sin RAG) en {execution_time:.2f}s")
-                logger.info(f"  - Respondida directamente por ClassifierAgent")
+                logger.info(f"  - Estrategia: {decision['strategy']}")
+                logger.info(f"  - Respondida directamente por RAGAgent")
                 logger.info("="*80)
                 
                 return {
                     "query": query,
                     "response": response_text,
                     "intent": intent,
+                    "strategy": decision["strategy"],
                     "documents_used": 0,
                     "validation": {"is_valid": True, "confidence_score": 1.0},
                     "trace": trace,
@@ -187,23 +358,26 @@ class AutonomousOrchestrator:
                 }
             
             # ===============================
-            # PASO 2: RECUPERACIÓN
+            # PASO 3: RECUPERACIÓN (según modo decidido)
             # ===============================
-            logger.info("\n[PASO 2] Recuperando documentos...")
+            logger.info(f"\n[PASO 3] Recuperando {decision['num_documents']} documentos (modo: {decision['retrieval_mode']})...")
+            
             retrieval_result = self.retriever.retrieve(
                 query=query,
-                intent=intent
+                intent=intent,
+                k=decision['num_documents']
             )
             
             documents = retrieval_result["documents"]
             
             trace["steps"].append({
-                "step": 2,
+                "step": 3,
                 "agent": "RetrieverAgent",
-                "action": "Recuperar documentos",
+                "action": f"Recuperar documentos ({decision['retrieval_mode']})",
                 "result": {
                     "documents_found": len(documents),
-                    "query_used": retrieval_result["query_used"]
+                    "query_used": retrieval_result["query_used"],
+                    "strategy_requested": decision["num_documents"]
                 }
             })
             trace["agents_called"].append("RetrieverAgent")
@@ -219,6 +393,7 @@ class AutonomousOrchestrator:
                     "query": query,
                     "response": "No se encontraron documentos relevantes para responder tu consulta.",
                     "intent": intent,
+                    "strategy": decision["strategy"],
                     "documents_used": 0,
                     "validation": {"is_valid": True, "confidence_score": 1.0},
                     "trace": trace,
@@ -226,7 +401,7 @@ class AutonomousOrchestrator:
                 }
             
             # ===============================
-            # PASO 3: GENERACIÓN (con loop)
+            # PASO 4: GENERACIÓN (con loop de regeneración)
             # ===============================
             response_text = None
             validation_result = None
@@ -235,7 +410,7 @@ class AutonomousOrchestrator:
             while generation_attempt < self.max_regeneration_attempts:
                 generation_attempt += 1
                 
-                logger.info(f"\n[PASO 3.{generation_attempt}] Generando respuesta...")
+                logger.info(f"\n[PASO 4.{generation_attempt}] Generando respuesta...")
                 
                 generation_result = self.rag_agent.generate(
                     query=query,
@@ -246,7 +421,7 @@ class AutonomousOrchestrator:
                 response_text = generation_result["response"]
                 
                 trace["steps"].append({
-                    "step": f"3.{generation_attempt}",
+                    "step": f"4.{generation_attempt}",
                     "agent": "RAGAgent",
                     "action": f"Generar respuesta (intento {generation_attempt})",
                     "result": {
@@ -259,46 +434,58 @@ class AutonomousOrchestrator:
                 logger.info(f"✓ Respuesta generada ({len(response_text)} caracteres)")
                 
                 # ===============================
-                # PASO 4: VALIDACIÓN
+                # PASO 5: VALIDACIÓN (solo si la estrategia lo requiere)
                 # ===============================
-                logger.info(f"\n[PASO 4.{generation_attempt}] Validando respuesta...")
-                
-                validation_result = self.critic.validate(
-                    query=query,
-                    response=response_text,
-                    context_documents=documents
-                )
-                
-                trace["steps"].append({
-                    "step": f"4.{generation_attempt}",
-                    "agent": "CriticAgent",
-                    "action": "Validar respuesta",
-                    "result": {
-                        "is_valid": validation_result["is_valid"],
-                        "confidence_score": validation_result["confidence_score"],
-                        "needs_regeneration": validation_result["needs_regeneration"]
-                    }
-                })
-                trace["agents_called"].append("CriticAgent")
-                
-                logger.info(f"✓ Validación: valid={validation_result['is_valid']}, "
-                          f"score={validation_result['confidence_score']:.2f}, "
-                          f"regenerate={validation_result['needs_regeneration']}")
-                
-                # Decidir si regenerar
-                if not validation_result["needs_regeneration"]:
-                    logger.info("✓ Respuesta APROBADA")
-                    break
-                else:
-                    logger.warning(f"⚠ Respuesta RECHAZADA - Problemas: {validation_result['issues']}")
-                    trace["regeneration_count"] += 1
+                if decision["needs_validation"]:
+                    logger.info(f"\n[PASO 5.{generation_attempt}] Validando respuesta...")
                     
-                    if generation_attempt >= self.max_regeneration_attempts:
-                        logger.warning(f"⚠ Máximo de regeneraciones alcanzado ({self.max_regeneration_attempts})")
-                        logger.warning("Devolviendo última respuesta generada a pesar de validación")
+                    validation_result = self.critic.validate(
+                        query=query,
+                        response=response_text,
+                        context_documents=documents
+                    )
+                    
+                    trace["steps"].append({
+                        "step": f"5.{generation_attempt}",
+                        "agent": "CriticAgent",
+                        "action": "Validar respuesta",
+                        "result": {
+                            "is_valid": validation_result["is_valid"],
+                            "confidence_score": validation_result["confidence_score"],
+                            "needs_regeneration": validation_result["needs_regeneration"]
+                        }
+                    })
+                    trace["agents_called"].append("CriticAgent")
+                    
+                    logger.info(f"✓ Validación: valid={validation_result['is_valid']}, "
+                              f"score={validation_result['confidence_score']:.2f}, "
+                              f"regenerate={validation_result['needs_regeneration']}")
+                    
+                    # Decidir si regenerar
+                    if not validation_result["needs_regeneration"]:
+                        logger.info("✓ Respuesta APROBADA")
                         break
                     else:
-                        logger.info(f"→ Regenerando respuesta (intento {generation_attempt + 1}/{self.max_regeneration_attempts})")
+                        logger.warning(f"⚠ Respuesta RECHAZADA - Problemas: {validation_result['issues']}")
+                        trace["regeneration_count"] += 1
+                        
+                        if generation_attempt >= self.max_regeneration_attempts:
+                            logger.warning(f"⚠ Máximo de regeneraciones alcanzado ({self.max_regeneration_attempts})")
+                            logger.warning("Devolviendo última respuesta generada a pesar de validación")
+                            break
+                        else:
+                            logger.info(f"→ Regenerando respuesta (intento {generation_attempt + 1}/{self.max_regeneration_attempts})")
+                else:
+                    # Validación omitida por estrategia
+                    logger.info(f"\n[PASO 5.{generation_attempt}] Validación OMITIDA (estrategia: {decision['strategy']})")
+                    validation_result = {
+                        "is_valid": True,
+                        "confidence_score": 1.0,
+                        "needs_regeneration": False,
+                        "issues": [],
+                        "skipped": True
+                    }
+                    break  # No loop si no hay validación
             
             # ===============================
             # RESULTADO FINAL
@@ -308,6 +495,7 @@ class AutonomousOrchestrator:
             logger.info("\n" + "="*80)
             logger.info(f"✓ CONSULTA COMPLETADA en {execution_time:.2f}s")
             logger.info(f"  - Intención: {intent}")
+            logger.info(f"  - Estrategia: {decision['strategy']}")
             logger.info(f"  - Documentos: {len(documents)}")
             logger.info(f"  - Regeneraciones: {trace['regeneration_count']}")
             logger.info(f"  - Validación: {validation_result['confidence_score']:.2f}")
@@ -326,6 +514,7 @@ class AutonomousOrchestrator:
                 "query": query,
                 "response": response_text,
                 "intent": intent,
+                "strategy": decision["strategy"],
                 "documents_used": len(documents),
                 "validation": validation_result,
                 "trace": trace,
@@ -341,6 +530,7 @@ class AutonomousOrchestrator:
                 "query": query,
                 "response": f"Lo siento, hubo un error al procesar tu consulta: {str(e)}",
                 "intent": "error",
+                "strategy": "error",
                 "documents_used": 0,
                 "validation": {"is_valid": False, "confidence_score": 0.0},
                 "trace": trace,

@@ -2,14 +2,14 @@
 Pipeline RAG completo.
 Implementación: Persona 2
 
-Orquesta IndexerAgent y VectorStoreManager para proporcionar
+Orquesta AutonomousIndexerAgent y VectorStoreManager para proporcionar
 una interfaz de alto nivel para indexación y búsqueda.
 """
 import logging
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 
-from src.agents.indexer_agent import IndexerAgent
+from src.agents.autonomous_indexer_agent import AutonomousIndexerAgent
 from src.rag_pipeline.vectorstore import VectorStoreManager
 from src.config.paths import VECTORSTORE_DIR, VECTORSTORE_INDEX
 
@@ -23,7 +23,7 @@ class RAGPipeline:
     Implementación: Persona 2
     
     Orquesta los componentes del pipeline RAG:
-    - IndexerAgent: Para indexación de documentos
+    - AutonomousIndexerAgent: Para indexación de documentos
     - VectorStoreManager: Para búsqueda semántica
     
     Proporciona una interfaz de alto nivel para:
@@ -36,11 +36,11 @@ class RAGPipeline:
         """
         Inicializa el pipeline RAG.
         
-        Crea instancias de IndexerAgent y VectorStoreManager.
+        Crea instancias de AutonomousIndexerAgent y VectorStoreManager.
         """
         logger.info("Inicializando RAGPipeline...")
         
-        self.indexer = IndexerAgent()
+        self.indexer = AutonomousIndexerAgent()
         self.vectorstore = VectorStoreManager(index_name=VECTORSTORE_INDEX)
         
         logger.info("RAGPipeline inicializado correctamente")
@@ -53,7 +53,7 @@ class RAGPipeline:
         """
         Indexa todos los documentos de un directorio.
         
-        Usa IndexerAgent para ejecutar el pipeline completo:
+        Usa AutonomousIndexerAgent para ejecutar el pipeline completo:
         1. Cargar documentos (PDF, HTML, TXT)
         2. Limpiar y normalizar
         3. Chunkear con overlap

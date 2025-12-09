@@ -1,0 +1,34 @@
+{
+  "case_number": 10,
+  "timestamp": "20251209_173731",
+  "domain": "dinosaurios",
+  "query": "¿En qué períodos vivieron los dinosaurios?",
+  "response": "No se encontraron documentos relevantes para responder tu consulta.",
+  "trace": {
+    "intent": "busqueda",
+    "strategy": "simple_rag",
+    "documents_used": 0,
+    "execution_time": 21.443138,
+    "validation_passed": false,
+    "intermediate_steps": 0,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  },
+  "metadata": {
+    "intent": "busqueda",
+    "documents_used": 0,
+    "execution_time": 21.443138,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  }
+}

@@ -46,7 +46,7 @@ class LLMConfig:
         Usa Groq para optimización rápida de consultas.
         """
         return ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
             groq_api_key=self.groq_api_key,
             temperature=0.2,
             max_tokens=1000
@@ -58,7 +58,7 @@ class LLMConfig:
         Usa Groq por su latencia mínima y velocidad.
         """
         return ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
             groq_api_key=self.groq_api_key,
             temperature=0.3,
             max_tokens=2000
@@ -82,7 +82,7 @@ class LLMConfig:
         Usa Groq para decisiones rápidas de coordinación.
         """
         return ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
             groq_api_key=self.groq_api_key,
             temperature=0.1,
             max_tokens=1000
@@ -94,7 +94,7 @@ class LLMConfig:
         Usa Groq por velocidad.
         """
         return ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
             groq_api_key=self.groq_api_key,
             temperature=0.5,
             max_tokens=1500

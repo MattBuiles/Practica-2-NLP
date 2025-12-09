@@ -1,0 +1,34 @@
+{
+  "case_number": 2,
+  "timestamp": "20251209_181158",
+  "domain": "dinosaurios",
+  "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
+  "response": "No se encontraron documentos relevantes para responder tu consulta.",
+  "trace": {
+    "intent": "busqueda",
+    "strategy": "simple_rag",
+    "documents_used": 0,
+    "execution_time": 8.157977,
+    "validation_passed": false,
+    "intermediate_steps": 0,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  },
+  "metadata": {
+    "intent": "busqueda",
+    "documents_used": 0,
+    "execution_time": 8.157977,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  }
+}

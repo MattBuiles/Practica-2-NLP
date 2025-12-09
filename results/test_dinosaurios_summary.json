@@ -1,0 +1,126 @@
+{
+  "timestamp": "2025-12-09T17:37:32.829789",
+  "total_casos": 10,
+  "resultados": [
+    {
+      "caso": 1,
+      "categoria": "Información General",
+      "query": "¿Cuáles fueron los dinosaurios más grandes que existieron?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 3.265575,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_1_dinosaurios_20251209_173442.json"
+    },
+    {
+      "caso": 2,
+      "categoria": "Anatomía y Características",
+      "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 2.793716,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_2_dinosaurios_20251209_173446.json"
+    },
+    {
+      "caso": 3,
+      "categoria": "Evolución",
+      "query": "¿Cómo evolucionaron las aves a partir de los dinosaurios?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 2.870171,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_3_dinosaurios_20251209_173450.json"
+    },
+    {
+      "caso": 4,
+      "categoria": "Comportamiento",
+      "query": "¿Fueron los dinosaurios buenos padres?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 21.450987,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_4_dinosaurios_20251209_173512.json"
+    },
+    {
+      "caso": 5,
+      "categoria": "Extinción",
+      "query": "¿Cómo terminó un asteroide con la era de los dinosaurios?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 22.256583,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_5_dinosaurios_20251209_173535.json"
+    },
+    {
+      "caso": 6,
+      "categoria": "Especies Específicas",
+      "query": "Cuéntame sobre el Spinosaurus y sus habilidades de caza",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 22.694818,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_6_dinosaurios_20251209_173559.json"
+    },
+    {
+      "caso": 7,
+      "categoria": "Fósiles y Descubrimientos",
+      "query": "¿Qué nos revelan las huellas de dinosaurio?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 21.763132,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_7_dinosaurios_20251209_173622.json"
+    },
+    {
+      "caso": 8,
+      "categoria": "Anatomía Comparativa",
+      "query": "¿Qué diferencias hay entre el Stegosaurus y el Ankylosaurus?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "comparison_rag",
+      "documents_used": 0,
+      "execution_time": 27.598497,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_8_dinosaurios_20251209_173650.json"
+    },
+    {
+      "caso": 9,
+      "categoria": "Paleontología Moderna",
+      "query": "¿Cómo se preparan los fósiles para exhibición en museos?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 17.472627,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_9_dinosaurios_20251209_173709.json"
+    },
+    {
+      "caso": 10,
+      "categoria": "Cronología",
+      "query": "¿En qué períodos vivieron los dinosaurios?",
+      "response": "No se encontraron documentos relevantes para responder tu consulta.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 0,
+      "execution_time": 21.443138,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_10_dinosaurios_20251209_173731.json"
+    }
+  ]
+}

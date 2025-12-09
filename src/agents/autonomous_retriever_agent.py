@@ -5,11 +5,20 @@ Busca y optimiza la recuperación de documentos de forma inteligente.
 import logging
 from typing import Dict, Any, List
 from langchain.agents import create_agent
+from pydantic import BaseModel, Field
 
 from src.config.llm_config import llm_config
 from src.tools import RETRIEVER_TOOLS
 
 logger = logging.getLogger(__name__)
+
+
+class RetrievalResult(BaseModel):
+    """Modelo de salida estructurada para resultado de recuperación."""
+    documents: List[Dict[str, Any]] = Field(description="Lista de documentos recuperados")
+    query_used: str = Field(description="Query utilizada para la búsqueda")
+    num_documents: int = Field(description="Número de documentos encontrados")
+    optimized: bool = Field(description="Si la query fue optimizada")
 
 
 class AutonomousRetrieverAgent:

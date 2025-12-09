@@ -234,17 +234,26 @@ Ejecuta todas las herramientas necesarias de forma autónoma. Toma decisiones in
         try:
             logger.info(f"🤖 Indexación autónoma iniciada: {directory_path}")
             
+            # Invocar con formato LangChain 1.1
             result = self.agent_executor.invoke({
-                "input": task_description
+                "messages": [
+                    {"role": "user", "content": task_description}
+                ]
             })
             
             logger.info("✅ Indexación autónoma completada")
             
-            # Extraer respuesta y trace
+            # Extraer respuesta del nuevo formato de mensajes
+            messages = result.get('messages', [])
+            output = ""
+            for msg in messages:
+                if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
+                    output = msg.content
+            
             return {
                 "status": "success",
-                "response": result.get('output', ''),
-                "intermediate_steps": result.get('intermediate_steps', []),
+                "response": output,
+                "intermediate_steps": [],
                 "directory": directory_path,
                 "file_types": file_types
             }
@@ -302,16 +311,26 @@ Ejecuta de forma autónoma verificando errores en cada paso."""
         try:
             logger.info(f"🤖 Adición autónoma iniciada: {len(file_paths)} archivos")
             
+            # Invocar con formato LangChain 1.1
             result = self.agent_executor.invoke({
-                "input": task_description
+                "messages": [
+                    {"role": "user", "content": task_description}
+                ]
             })
             
             logger.info("✅ Adición autónoma completada")
             
+            # Extraer respuesta del nuevo formato
+            messages = result.get('messages', [])
+            output = ""
+            for msg in messages:
+                if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
+                    output = msg.content
+            
             return {
                 "status": "success",
-                "response": result.get('output', ''),
-                "intermediate_steps": result.get('intermediate_steps', []),
+                "response": output,
+                "intermediate_steps": [],
                 "files_count": len(file_paths)
             }
             
@@ -352,16 +371,26 @@ Simple y directo."""
         try:
             logger.info(f"🤖 Carga autónoma de índice iniciada")
             
+            # Invocar con formato LangChain 1.1
             result = self.agent_executor.invoke({
-                "input": task_description
+                "messages": [
+                    {"role": "user", "content": task_description}
+                ]
             })
             
             logger.info("✅ Carga autónoma completada")
             
+            # Extraer respuesta del nuevo formato
+            messages = result.get('messages', [])
+            output = ""
+            for msg in messages:
+                if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
+                    output = msg.content
+            
             return {
                 "status": "success",
-                "response": result.get('output', ''),
-                "intermediate_steps": result.get('intermediate_steps', [])
+                "response": output,
+                "intermediate_steps": []
             }
             
         except Exception as e:
@@ -384,14 +413,24 @@ Usa get_index_statistics para obtener estadísticas del índice actual.
 Retorna la información en formato claro."""
 
         try:
+            # Invocar con formato LangChain 1.1
             result = self.agent_executor.invoke({
-                "input": task_description
+                "messages": [
+                    {"role": "user", "content": task_description}
+                ]
             })
+            
+            # Extraer respuesta del nuevo formato
+            messages = result.get('messages', [])
+            output = ""
+            for msg in messages:
+                if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
+                    output = msg.content
             
             return {
                 "status": "success",
-                "response": result.get('output', ''),
-                "intermediate_steps": result.get('intermediate_steps', [])
+                "response": output,
+                "intermediate_steps": []
             }
             
         except Exception as e:

@@ -11,9 +11,15 @@ import sys
 import logging
 from pathlib import Path
 
-# Configurar logging
-from src.tools.logger_tool import LoggerTool
-LoggerTool.setup_logging(log_level="INFO", log_to_file=True)
+# Configurar logging estándar
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/system.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
 
 logger = logging.getLogger(__name__)
 

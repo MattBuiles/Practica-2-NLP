@@ -5,11 +5,20 @@ Genera respuestas basadas en contexto de forma inteligente y adaptativa.
 import logging
 from typing import Dict, Any, List
 from langchain.agents import create_agent
+from pydantic import BaseModel, Field
 
 from src.config.llm_config import llm_config
 from src.tools import RAG_TOOLS
 
 logger = logging.getLogger(__name__)
+
+
+class RAGResponse(BaseModel):
+    """Modelo de salida estructurada para generación RAG."""
+    response: str = Field(description="Respuesta generada")
+    used_rag: bool = Field(description="Si se utilizó RAG (contexto documental)")
+    sources_count: int = Field(description="Número de fuentes utilizadas")
+    confidence: float = Field(description="Confianza en la respuesta (0.0 a 1.0)")
 
 
 class AutonomousRAGAgent:
@@ -200,26 +209,35 @@ IMPORTANTE:
                 "input": f"Query: {query}\nIntent: {intent}\nDocumentos disponibles: {len(documents)}"
             }
             
-            # Ejecutar agente
-            # Nota: Las tools recibirán los documentos directamente cuando las invoquen
-            result = self.agent_executor.invoke(agent_input)
+            # Ejecutar agente con formato LangChain 1.1
+            result = self.agent_executor.invoke({
+                "messages": [
+                    {"role": "user", "content": f"Query: {query}\nIntent: {intent}\nDocumentos disponibles: {len(documents)}\n\nGenera una respuesta apropiada."}
+                ]
+            })
             
-            # Extraer respuesta
-            response_text = result.get("output", "")
-            steps = result.get("intermediate_steps", [])
+            # Extraer respuesta del nuevo formato de mensajes
+            messages = result.get("messages", [])
+            response_text = ""
+            tool_calls = []
+            used_rag = False
             
-            # Determinar si usó RAG
-            used_rag = any(
-                hasattr(step[0], 'tool') and 'rag_response' in step[0].tool
-                for step in steps
-            )
-            
-            # Si las tools no se ejecutaron correctamente, extraer respuesta de los steps
-            if not response_text and steps:
-                for step in steps:
-                    if isinstance(step[1], str) and len(step[1]) > 50:
-                        response_text = step[1]
-                        break
+            for msg in messages:
+                # AIMessage con tool_calls
+                if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                    tool_calls.extend(msg.tool_calls)
+                    for tc in msg.tool_calls:
+                        tool_name = tc.get("name", "") if isinstance(tc, dict) else getattr(tc, 'name', '')
+                        if 'rag_response' in tool_name:
+                            used_rag = True
+                # AIMessage con respuesta final
+                elif hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
+                    response_text = msg.content
+                # ToolMessage con resultados
+                elif hasattr(msg, 'tool_call_id') and hasattr(msg, 'content'):
+                    # Si la tool generó la respuesta, usarla
+                    if msg.content and len(msg.content) > 50:
+                        response_text = msg.content
             
             logger.info(f"[AutonomousRAG] Respuesta generada ({len(response_text)} chars), RAG={used_rag}")
             
@@ -229,10 +247,10 @@ IMPORTANTE:
                 "num_documents": len(documents),
                 "intermediate_steps": [
                     {
-                        "tool": step[0].tool if hasattr(step[0], 'tool') else "reasoning",
-                        "preview": str(step[1])[:200]
+                        "tool": tc.get("name", "unknown") if isinstance(tc, dict) else getattr(tc, 'name', 'unknown'),
+                        "preview": str(tc.get("args", {}) if isinstance(tc, dict) else getattr(tc, 'args', {}))[:200]
                     }
-                    for step in steps
+                    for tc in tool_calls
                 ]
             }
             
