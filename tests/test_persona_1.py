@@ -2,6 +2,11 @@
 Script de Prueba Rápida - Persona 1
 Verifica que tus componentes implementados funcionen correctamente.
 """
+import sys
+from pathlib import Path
+
+# Agregar src al path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def test_persona_1_components():
     """Prueba los componentes implementados por Persona 1."""
