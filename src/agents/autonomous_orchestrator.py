@@ -164,33 +164,35 @@ SOLO RESPONDE CON EL JSON, NADA MÁS."""
         text = re.sub(r'```\s*', '', text)
         text = text.strip()
         
-        # Buscar JSON en el texto
-        json_match = re.search(r'\{[\s\S]*?\}', text)
-        if json_match:
-            text = json_match.group()
+        # Primero intentar extraer campos con regex (más robusto)
+        strategy_match = re.search(r'"strategy"\s*:\s*"([^"]+)"', text)
+        docs_match = re.search(r'"num_documents"\s*:\s*(\d+)', text)
+        mode_match = re.search(r'"retrieval_mode"\s*:\s*"([^"]+)"', text)
+        validation_match = re.search(r'"needs_validation"\s*:\s*(true|false)', text, re.I)
+        reasoning_match = re.search(r'"reasoning"\s*:\s*"([^"]+)"', text)
         
-        # Intentar parsear JSON
+        # Si encontramos los campos principales, construir respuesta directamente
+        if strategy_match:
+            return {
+                "strategy": strategy_match.group(1),
+                "num_documents": int(docs_match.group(1)) if docs_match else 5,
+                "retrieval_mode": mode_match.group(1) if mode_match else "standard",
+                "needs_validation": validation_match.group(1).lower() == 'true' if validation_match else True,
+                "reasoning": reasoning_match.group(1) if reasoning_match else "Extraído con regex"
+            }
+        
+        # Si no, intentar parsear JSON completo
+        # Buscar JSON en el texto (manejar newlines)
+        text_clean = re.sub(r'\n\s*', ' ', text)
+        json_match = re.search(r'\{[^{}]+\}', text_clean)
+        if json_match:
+            text_clean = json_match.group()
+        
         try:
-            data = json.loads(text)
+            data = json.loads(text_clean)
         except json.JSONDecodeError:
-            # Limpiar newlines y reintentar
-            cleaned = re.sub(r'\n\s*', ' ', text)
-            try:
-                data = json.loads(cleaned)
-            except json.JSONDecodeError:
-                # Extraer campos manualmente
-                strategy_match = re.search(r'"strategy"\s*:\s*"(\w+)"', text)
-                docs_match = re.search(r'"num_documents"\s*:\s*(\d+)', text)
-                
-                if strategy_match:
-                    return {
-                        "strategy": strategy_match.group(1),
-                        "num_documents": int(docs_match.group(1)) if docs_match else 5,
-                        "retrieval_mode": "standard",
-                        "needs_validation": True,
-                        "reasoning": "Extraído manualmente"
-                    }
-                raise ValueError(f"No se pudo parsear JSON: {text[:200]}")
+            # Fallback final
+            raise ValueError(f"No se pudo parsear JSON: {text[:200]}")
         
         # Corregir tipos (Groq a veces devuelve strings)
         if 'num_documents' in data:

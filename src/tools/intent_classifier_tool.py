@@ -26,48 +26,52 @@ def _parse_classification_json(text: str) -> Dict[str, Any]:
     text = re.sub(r'```\s*', '', text)
     text = text.strip()
     
-    # Intentar encontrar JSON en el texto
-    json_match = re.search(r'\{[^{}]*\}', text)
-    if json_match:
-        text = json_match.group()
+    # PRIMERO: Intentar extraer campos con regex (más robusto ante newlines)
+    intent_match = re.search(r'"intent"\s*:\s*"(\w+)"', text)
+    conf_match = re.search(r'"confidence"\s*:\s*([\d.]+)', text)
+    rag_match = re.search(r'"requires_rag"\s*:\s*(true|false)', text, re.I)
+    reasoning_match = re.search(r'"reasoning"\s*:\s*"([^"]+)"', text)
     
-    try:
-        data = json.loads(text)
-    except json.JSONDecodeError:
-        # Intentar limpiar newlines y volver a parsear
-        cleaned = re.sub(r'\n\s*', ' ', text)
+    # Si encontramos el intent, construir respuesta directamente
+    if intent_match:
+        return {
+            "intent": intent_match.group(1),
+            "confidence": float(conf_match.group(1)) if conf_match else 0.85,
+            "requires_rag": rag_match.group(1).lower() == 'true' if rag_match else True,
+            "reasoning": reasoning_match.group(1) if reasoning_match else "Extraído con regex"
+        }
+    
+    # Si no encontramos con regex, intentar JSON limpio
+    cleaned = re.sub(r'\n\s*', ' ', text)
+    json_match = re.search(r'\{[^{}]+\}', cleaned)
+    if json_match:
         try:
-            data = json.loads(cleaned)
+            data = json.loads(json_match.group())
+            # Corregir tipos
+            if 'confidence' in data and isinstance(data['confidence'], str):
+                data['confidence'] = float(data['confidence'])
+            if 'requires_rag' in data and isinstance(data['requires_rag'], str):
+                data['requires_rag'] = data['requires_rag'].lower() == 'true'
+            return data
         except json.JSONDecodeError:
-            # Último intento: extraer campos manualmente con regex
-            intent_match = re.search(r'"intent"\s*:\s*"(\w+)"', text)
-            conf_match = re.search(r'"confidence"\s*:\s*([\d.]+)', text)
-            rag_match = re.search(r'"requires_rag"\s*:\s*(true|false)', text, re.I)
-            
-            if intent_match:
-                return {
-                    "intent": intent_match.group(1),
-                    "confidence": float(conf_match.group(1)) if conf_match else 0.7,
-                    "requires_rag": rag_match.group(1).lower() == 'true' if rag_match else True,
-                    "reasoning": "Extraído manualmente de respuesta"
-                }
-            
-            # Fallback final: analizar texto para inferir intent
-            text_lower = text.lower()
-            if "compar" in text_lower:
-                intent = "comparacion"
-            elif "resum" in text_lower:
-                intent = "resumen"
-            elif "general" in text_lower or "salud" in text_lower:
-                intent = "general"
-            else:
-                intent = "busqueda"
-            return {
-                "intent": intent,
-                "confidence": 0.6,
-                "requires_rag": intent != "general",
-                "reasoning": f"Inferido del texto: {text[:100]}"
-            }
+            pass
+    
+    # Fallback final: analizar texto para inferir intent
+    text_lower = text.lower()
+    if "compar" in text_lower:
+        intent = "comparacion"
+    elif "resum" in text_lower:
+        intent = "resumen"
+    elif "general" in text_lower or "hola" in text_lower or "salud" in text_lower:
+        intent = "general"
+    else:
+        intent = "busqueda"
+    return {
+        "intent": intent,
+        "confidence": 0.7,
+        "requires_rag": intent != "general",
+        "reasoning": f"Inferido del texto"
+    }
     
     # Si llegamos aquí, data fue parseado correctamente
     # Corregir tipos si es necesario

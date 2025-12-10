@@ -236,14 +236,28 @@ IMPORTANTE:
     
     def _generate_rag_response_direct(self, query: str, documents: List[Dict[str, Any]], intent: str) -> str:
         """Genera respuesta RAG directamente con el LLM, sin pasar por tools."""
-        # Preparar contexto de documentos
+        import os
+        
+        # Preparar contexto de documentos CON nombres de fuentes
         context_parts = []
+        source_references = []
+        
         for idx, doc in enumerate(documents[:5], 1):  # Limitar a 5 docs
-            source = doc.get('metadata', {}).get('source', 'Documento')
+            # Obtener nombre del archivo fuente
+            metadata = doc.get('metadata', {})
+            source_path = metadata.get('source', 'Documento desconocido')
+            # Extraer solo el nombre del archivo sin ruta
+            source_name = os.path.basename(source_path) if source_path else f'Documento {idx}'
+            # Limpiar extensión y caracteres especiales
+            source_name = source_name.replace('.html', '').replace('.txt', '').replace('.pdf', '')
+            source_name = source_name.replace('_', ' ').replace('  ', ' ')[:80]
+            
             content = doc.get('content', '')[:800]  # Limitar contenido
-            context_parts.append(f"[Fuente {idx}]: {content}")
+            context_parts.append(f"[Fuente {idx} - {source_name}]:\n{content}")
+            source_references.append(f"[Fuente {idx}]: {source_name}")
         
         context = "\n\n".join(context_parts)
+        references = "\n".join(source_references)
         
         # Seleccionar instrucciones según intent
         if intent == "resumen":
@@ -262,14 +276,19 @@ CONTEXTO:
 
 INSTRUCCIONES:
 - {instructions}
-- Cita las fuentes usando [Fuente X]
-- NO inventes información
-- Si no hay suficiente información, indícalo
+- Cita las fuentes usando [Fuente X] cuando uses información de ellas
+- NO inventes información que no esté en el contexto
+- Si no hay suficiente información, indícalo claramente
 
 RESPUESTA:"""
         
         response = self.llm.invoke(prompt)
-        return response.content
+        response_text = response.content
+        
+        # Agregar referencias al final
+        response_text += f"\n\n---\n**Referencias:**\n{references}"
+        
+        return response_text
     
     def _generate_general_response(self, query: str) -> str:
         """Genera respuesta conversacional sin RAG."""
