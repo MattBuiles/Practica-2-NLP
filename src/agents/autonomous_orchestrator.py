@@ -369,31 +369,36 @@ SOLO RESPONDE CON EL JSON, NADA MÁS."""
             # ===============================
             if decision["strategy"] == "direct_response":
                 logger.info("\n[DECISIÓN] Estrategia: direct_response → Sin RAG")
-                logger.info("\n[DECISIÓN] Estrategia: direct_response → Sin RAG")
                 
-                # Respuesta directa usando clasificador 
-                generation_result = self.rag_agent.generate(
-                    query=query,
-                    documents=[],
-                    intent=intent
-                )
+                # Respuesta directa usando LLM del clasificador (sin RAG)
+                response_text = classification.get("response", "")
                 
-                response_text = generation_result["response"]
+                # Si no hay respuesta en clasificación, usar LLM general
+                if not response_text:
+                    logger.info("→ Generando respuesta directa con LLM del clasificador...")
+                    time.sleep(API_DELAY)
+                    classifier_llm = llm_config.get_classifier_llm()
+                    messages = [
+                        {"role": "system", "content": "Eres un asistente amigable y conciso. Responde de forma natural y breve."},
+                        {"role": "user", "content": query}
+                    ]
+                    response = classifier_llm.invoke(messages)
+                    response_text = response.content
                 
                 trace["steps"].append({
                     "step": 3,
-                    "agent": "RAGAgent",
+                    "agent": "ClassifierLLM",
                     "action": "Responder consulta general directamente",
                     "result": {"used_rag": False, "response_length": len(response_text)}
                 })
-                trace["agents_called"].append("RAGAgent")
+                trace["agents_called"].append("ClassifierLLM")
                 
                 execution_time = (datetime.now() - start_time).total_seconds()
                 
                 logger.info("\n" + "="*80)
                 logger.info(f"✓ CONSULTA COMPLETADA (sin RAG) en {execution_time:.2f}s")
                 logger.info(f"  - Estrategia: {decision['strategy']}")
-                logger.info(f"  - Respondida directamente por RAGAgent")
+                logger.info(f"  - Respondida directamente por ClassifierLLM")
                 logger.info("="*80)
                 
                 return {
