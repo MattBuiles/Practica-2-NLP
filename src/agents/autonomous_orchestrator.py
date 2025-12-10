@@ -134,13 +134,13 @@ class AutonomousOrchestrator:
 
 RESPONDE ÚNICAMENTE CON UN JSON VÁLIDO (sin markdown, sin explicaciones):
 
-{
+{{
   "strategy": "simple_rag",
   "num_documents": 5,
   "retrieval_mode": "standard",
   "needs_validation": true,
   "reasoning": "Explicación breve"
-}
+}}
 
 VALORES PERMITIDOS:
 - strategy: "direct_response", "simple_rag", "comparison_rag", "summary_rag", "multi_hop"
@@ -232,6 +232,7 @@ SOLO RESPONDE CON EL JSON, NADA MÁS."""
             )
             
             response = self.llm.invoke(messages)
+            
             decision = self._parse_json_response(response.content)
             
             result = {

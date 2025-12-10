@@ -1,58 +1,33 @@
-# Sistema Agentic AI - Práctica 3 NLP
+# Sistema RAG Autónomo - Dinosaurios
 
-## 📋 División de Responsabilidades del Equipo
+Sistema de Generación Aumentada por Recuperación (RAG) con agentes autónomos especializados para responder preguntas sobre dinosaurios usando un corpus de 100+ documentos científicos.
 
-### ✅ Persona 1: Arquitectura, Orquestador y Clasificador (IMPLEMENTADO)
+## 🎯 Características Principales
 
-**Componentes Completados:**
-- ✅ Arquitectura completa del sistema
-- ✅ Agente Orquestador
-- ✅ Agente Clasificador (Gemini)
-- ✅ Sistema de Trazabilidad
-- ✅ Configuración LLM con justificación
-
-### ✅ Persona 3: Recuperación, Generación y Validación (IMPLEMENTADO)
-
-**Componentes Completados:**
-- ✅ RetrieverAgent (Optimización + FAISS)
-- ✅ RAGAgent (Prompts especializados + Generación)
-- ✅ CriticAgent (Validación multi-criterio + Regeneración)
-- ✅ Ciclo de realimentación completo
-- ✅ Documentación técnica exhaustiva
-
-### ✅ Persona 2: Ingestión y Vector Store (IMPLEMENTADO)
-
-**Componentes Completados:**
-- ✅ VectorStoreManager (FAISS) - Búsqueda semántica eficiente
-- ✅ EmbeddingsManager - Generación de embeddings con sentence-transformers
-- ✅ RAG Pipeline - Orquestación completa de indexación y búsqueda
-- ✅ Tools - Loaders (PDF, HTML, TXT) y TextCleaner
-- ✅ DocumentChunker - Chunking inteligente con overlap
-- ✅ IndexerAgent - Pipeline completo de indexación
-
-## 🎯 Funcionalidad Actual (Persona 1)
-
-- **Clasificación de Intención**: 4 tipos (búsqueda, resumen, comparación, general)
-- **Orquestación**: Coordinación del flujo entre agentes
-- **Trazabilidad Completa**: Registro de todas las decisiones
-- **Uso Diferenciado de LLMs**: Gemini (clasificación) y Groq (coordinación)
+- ✅ **Sistema RAG Completo**: Clasificación, recuperación, generación y validación
+- ✅ **Agentes Autónomos**: 4 agentes especializados con LangChain 1.1
+- ✅ **Vector Store**: FAISS con 6054 documentos indexados
+- ✅ **LLM Groq**: Llama-3.3-70b-versatile para todos los agentes
+- ✅ **Validación Automática**: Critic agent con regeneración si es necesario
+- ✅ **Trazabilidad Completa**: Logs detallados y exportación de resultados
+- ✅ **UI Streamlit**: Interfaz web para pruebas interactivas
+- ✅ **Testing Automatizado**: Suite de tests con 10 casos de uso
 
 ## 📋 Requisitos
 
 - Python 3.9+
 - API Keys:
-  - Google AI (Gemini)
-  - Groq
+  - Groq API (para LLM Llama-3.3-70b-versatile)
 
 ## 🚀 Instalación
 
-1. Clonar repositorio:
+1. **Clonar repositorio:**
 ```bash
 git clone <repository-url>
 cd Practica-2-NLP
 ```
 
-2. Crear entorno virtual:
+2. **Crear entorno virtual:**
 ```bash
 python -m venv venv
 # Windows
@@ -61,226 +36,374 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-3. Instalar dependencias:
+3. **Instalar dependencias:**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Configurar variables de entorno:
+4. **Configurar variables de entorno:**
 Crear archivo `.env` en la raíz:
 ```env
-GOOGLE_API_KEY=tu_api_key_de_google
 GROQ_API_KEY=tu_api_key_de_groq
 ```
 
 ## 🏗️ Arquitectura del Sistema
 
+### Flujo de Procesamiento
+
 ```
 Usuario
    ↓
-[Orchestrator] ✅ IMPLEMENTADO (Persona 1)
+[AutonomousOrchestrator]
    ↓
-┌──────────────────────┐
-│ 1. Clasificador      │ ✅ IMPLEMENTADO (Persona 1)
-│    - Gemini 1.5      │
-│    - 4 intenciones   │
-└──────────────────────┘
+┌─────────────────────────────┐
+│ 1. ClassifierAgent (Groq)  │
+│    - Clasifica intención    │
+│    - Determina si usa RAG   │
+└─────────────────────────────┘
    ↓
-┌──────────────────────┐
-│ 2. Retriever         │ ✅ IMPLEMENTADO (Persona 3)
-│    - Groq Llama      │
-│    - FAISS Search    │
-│    - Optimización    │
-└──────────────────────┘
+┌─────────────────────────────┐
+│ 2. RetrieverAgent (Groq)   │
+│    - Optimiza query         │
+│    - Búsqueda en FAISS      │
+│    - Retorna docs relevantes│
+└─────────────────────────────┘
    ↓
-┌──────────────────────┐
-│ 3. RAG Agent         │ ✅ IMPLEMENTADO (Persona 3)
-│    - Groq Llama      │
-│    - Generación      │
-│    - Prompts         │
-└──────────────────────┘
+┌─────────────────────────────┐
+│ 3. RAGAgent (Groq)         │
+│    - Genera respuesta       │
+│    - Incluye fuentes        │
+│    - Adapta por intención   │
+└─────────────────────────────┘
    ↓
-┌──────────────────────┐
-│ 4. Critic Agent      │ ✅ IMPLEMENTADO (Persona 3)
-│    - Gemini 2.5      │
-│    - Validación      │
-│    - Regeneración    │
-└──────────────────────┘
+┌─────────────────────────────┐
+│ 4. CriticAgent (Groq)      │
+│    - Valida calidad         │
+│    - Detecta alucinaciones  │
+│    - Regenera si necesario  │
+└─────────────────────────────┘
    ↓
-Respuesta Final
+Respuesta Final + Metadatos
+
 ```
 
-### Flujo Implementado:
-
-1. **Usuario** → Orchestrator
-2. **Clasificador (Gemini)** → Determina intención
-3. **Orchestrator** → Routing según intención
-4. **Trazabilidad** → Registra cada paso
-
-**Nota:** Todos los componentes están implementados. Persona 2 maneja la indexación y Persona 3 maneja la recuperación, generación y validación.
+### Estructura del Proyecto
 
 ```
 Practica-2-NLP/
 ├── src/
-│   ├── agents/              # Agentes especializados
-│   │   ├── classifier_agent.py
-│   │   ├── retriever_agent.py
-│   │   ├── rag_agent.py
-│   │   ├── critic_agent.py
-│   │   ├── indexer_agent.py
-│   │   └── orchestrator.py
-│   ├── config/              # Configuración
-│   ├── rag_pipeline/        # Pipeline RAG
-│   ├── tools/               # Herramientas
-│   └── utils/               # Utilidades
+│   ├── agents/                    # Agentes autónomos
+│   │   ├── autonomous_classifier_agent.py
+│   │   ├── autonomous_retriever_agent.py
+│   │   ├── autonomous_rag_agent.py
+│   │   ├── autonomous_critic_agent.py
+│   │   └── autonomous_orchestrator.py
+│   ├── config/                    # Configuración LLM
+│   │   └── llm_config.py
+│   ├── rag_pipeline/              # Pipeline RAG
+│   │   ├── embeddings_manager.py
+│   │   ├── vectorstore_manager.py
+│   │   └── document_chunker.py
+│   ├── tools/                     # Herramientas LangChain
+│   │   ├── document_search_tool.py
+│   │   ├── response_generator_tool.py
+│   │   ├── validation_tool.py
+│   │   └── logging_tool.py
+│   └── utils/                     # Utilidades
 ├── data/
-│   ├── raw/                 # Documentos originales (mín. 100)
-│   ├── processed/
-│   └── vectorstore/         # Índice FAISS
-├── logs/                    # Logs del sistema
-├── results/                 # Resultados y casos de uso
-├── main.py                  # Punto de entrada
+│   ├── raw/                       # 100+ docs sobre dinosaurios
+│   └── vectorstore/
+│       └── faiss_index/           # Índice FAISS (6054 chunks)
+├── logs/                          # Trazas del sistema
+├── results/
+│   ├── casos_de_uso/              # Resultados individuales
+│   └── respuestas/                # Batches de resultados
+├── docs/                          # Documentación técnica
+├── main.py                        # Punto de entrada principal
+├── ui_dinosaurios.py              # UI Streamlit
+├── test_dinosaurios.py            # Suite de tests
 └── requirements.txt
 ```
 
-## 💻 Uso
+## 💻 Uso del Sistema
 
-### 1. Indexar Documentos
+### 1. Indexación de Documentos
 
-Coloca tus documentos (PDF, HTML, TXT) en `data/raw/` y ejecuta:
+**Nota**: El vector store ya está indexado con 6054 documentos sobre dinosaurios.
+
+Si necesitas reindexar:
 
 ```bash
 python main.py --index
 ```
 
-### 2. Modo Interactivo
+### 2. Interfaz Web (Streamlit)
 
 ```bash
-python main.py --interactive
+streamlit run ui_dinosaurios.py
 ```
 
-o simplemente:
+Accede a `http://localhost:8501` y prueba los 10 casos de uso predefinidos.
 
+### 3. Tests Automatizados
+
+**Modo completo** (10 casos de uso):
 ```bash
-python main.py
+python test_dinosaurios.py
 ```
 
-### 3. Modo Batch
-
-Crea un archivo con consultas (una por línea):
-
+**Modo debug** (2 casos):
 ```bash
-python main.py --batch queries.txt
+python test_dinosaurios.py --debug
+```
+
+Los resultados se exportan a:
+- `results/casos_de_uso/` - Archivos JSON individuales
+- `results/respuestas/` - Batches completos
+- `logs/` - Logs detallados
+
+### 4. Uso Programático
+
+```python
+from src.agents.autonomous_orchestrator import AutonomousOrchestrator
+
+# Inicializar
+orchestrator = AutonomousOrchestrator()
+
+# Procesar consulta
+result = orchestrator.process_query(
+    "¿Cuáles fueron los dinosaurios más grandes?"
+)
+
+# Resultados
+print(f"Respuesta: {result['response']}")
+print(f"Intención: {result['intent']}")
+print(f"Estrategia: {result['strategy']}")
+print(f"Documentos: {result['num_documents']}")
+print(f"Validación: {result['validation_score']}")
 ```
 
 ## 🤖 Agentes del Sistema
 
-### 1. Clasificador de Intención (Gemini)
-- Clasifica consultas en 4 categorías
-- Determina si requiere RAG
-- Proporciona razonamiento
+### 1. ClassifierAgent (Groq)
+**Propósito**: Clasificar la intención del usuario
 
-### 2. Recuperador Semántico (Groq)
-- Optimiza consultas
-- Búsqueda en FAISS
-- Rankea resultados
+**Intenciones**:
+- `busqueda`: Búsqueda de información específica
+- `resumen`: Solicitud de resumen
+- `comparacion`: Comparación de conceptos
+- `general`: Conversación general (no requiere RAG)
 
-### 3. Generador RAG (Groq)
-- Genera respuestas con contexto
-- Incluye citas
-- Adapta según intención
-
-### 4. Crítico/Verificador (Gemini)
-- Valida coherencia
-- Detecta alucinaciones
-- Regenera si es necesario
-
-### 5. Indexador (Persona 2)
-- Carga documentos (PDF, HTML, TXT)
-- Limpieza y normalización de texto
-- Chunking inteligente con overlap
-- Generación de embeddings
-- Indexación en FAISS
-- Persistencia de índices
-
-## 📊 Ejemplos de Uso
-
-```python
-from src.agents.orchestrator import Orchestrator
-
-# Inicializar sistema
-orchestrator = Orchestrator()
-
-# Procesar consulta
-result = orchestrator.process_query("¿Qué es la diabetes?")
-
-print(result['response'])
-print(result['sources'])
+**Output**:
+```json
+{
+  "intent": "busqueda",
+  "confidence": 0.9,
+  "requires_rag": true,
+  "reasoning": "Usuario busca información específica sobre T-Rex"
+}
 ```
 
-## 🔧 Configuración
+### 2. RetrieverAgent (Groq)
+**Propósito**: Recuperar documentos relevantes del vector store
 
-Edita `src/config/settings.yaml` para ajustar:
+**Capacidades**:
+- Optimización de query con LLM
+- Búsqueda semántica en FAISS
+- Filtrado por metadata
+- Ranking de resultados
 
-- Tamaño de chunks
-- Número de documentos a recuperar
-- Criterios de validación
-- Y más...
+**Output**: Lista de documentos con metadata y scores
 
-## 📈 Casos de Uso
+### 3. RAGAgent (Groq)
+**Propósito**: Generar respuesta usando contexto recuperado
 
-Los casos de uso se exportan automáticamente a:
-- JSON: `results/casos_de_uso/caso_XX.json`
-- Markdown: `results/casos_de_uso/caso_XX.md`
+**Características**:
+- Prompts especializados por intención
+- Inclusión de fuentes con nombres de documentos
+- Sección de referencias
+- Adaptación según tipo de consulta
 
-## 🎓 Arquitectura
+**Output**: Respuesta + referencias formateadas
 
+### 4. CriticAgent (Groq)
+**Propósito**: Validar calidad de la respuesta
+
+**Criterios de validación**:
+- Coherencia con documentos
+- Detección de alucinaciones
+- Completitud de la información
+- Calidad de las fuentes
+
+**Output**:
+```json
+{
+  "is_valid": true,
+  "score": 0.9,
+  "should_regenerate": false,
+  "feedback": "Respuesta coherente y bien fundamentada"
+}
 ```
-Usuario → Orquestador → Clasificador (Gemini)
-                    ↓
-        ¿Requiere RAG? → NO → Respuesta General
-                    ↓ SÍ
-            Recuperador (Groq) → FAISS
-                    ↓
-            Generador RAG (Groq)
-                    ↓
-            Crítico (Gemini) → ¿Válida?
-                    ↓ NO → Regenerar (máx 2 intentos)
-                    ↓ SÍ
-                Respuesta Final
+
+**Regeneración**: Hasta 2 intentos si la validación falla
+
+## 📊 Casos de Uso
+
+El sistema incluye 10 casos de uso sobre dinosaurios:
+
+1. **Información General**: Dinosaurios más grandes
+2. **Anatomía**: Brazos del T-Rex
+3. **Comportamiento**: Dinosaurios buenos padres
+4. **Descubrimientos**: Procedimiento al encontrar fósiles
+5. **Extinción**: Cómo se extinguieron
+6. **Alimentación**: Qué comían
+7. **Hábitat**: Dónde vivían
+8. **Comparación**: Carnívoros vs Herbívoros
+9. **Resumen**: Titanosaurios
+10. **Conversacional**: Saludo
+
+### Ejemplo de Output
+
+```json
+{
+  "query": "¿Cuáles fueron los dinosaurios más grandes?",
+  "intent": "busqueda",
+  "strategy": "simple_rag",
+  "documents_retrieved": 5,
+  "response": "Los dinosaurios más grandes fueron los titanosaurios...",
+  "validation_score": 0.9,
+  "processing_time": 10.5,
+  "sources": [
+    "Why were dinosaurs so big.html",
+    "Preparación de fósiles.html"
+  ]
+}
 ```
 
-## 📝 Justificación de LLMs
+## 🔧 Configuración Técnica
 
-### Gemini (Google AI)
-- **Clasificador**: Mejor comprensión contextual profunda
-- **Crítico**: Razonamiento complejo para validación
+### LLM Configuration
 
-### Groq
-- **Recuperador**: Latencia mínima para optimización
-- **RAG**: Velocidad en generación de respuestas
+**Todos los agentes usan Groq**:
+- Modelo: `llama-3.3-70b-versatile`
+- Temperatura: 0.3 (respuestas consistentes)
+- Max tokens: 2000
+- API Delay: 1.5s (evitar rate limiting)
+
+**Por qué Groq**:
+- ✅ Velocidad: Latencia ultra-baja
+- ✅ Consistencia: Respuestas determinísticas
+- ✅ Costo: Tier gratuito generoso
+- ✅ Calidad: Llama-3.3-70b es muy capaz
+
+### Vector Store
+
+- **Motor**: FAISS (CPU)
+- **Embeddings**: sentence-transformers/all-MiniLM-L6-v2
+- **Dimensión**: 384
+- **Documentos**: 6054 chunks
+- **Chunk size**: 1000 caracteres
+- **Overlap**: 200 caracteres
+
+### Estrategias de Orquestación
+
+El orchestrator decide automáticamente:
+
+| Estrategia | Intención | Docs | Modo |
+|------------|-----------|------|------|
+| `direct_response` | general | 0 | none |
+| `simple_rag` | busqueda | 5 | standard |
+| `comparison_rag` | comparacion | 6 | comparison |
+| `summary_rag` | resumen | 8 | summary |
+
+## 🎯 Métricas de Rendimiento
+
+**Tiempos promedio** (en test con 10 casos):
+- Clasificación: ~1.5s
+- Recuperación: ~2.5s
+- Generación: ~3s
+- Validación: ~2.5s
+- **Total**: ~10s por consulta
+
+**Calidad**:
+- Validación exitosa: ~90%
+- Regeneraciones necesarias: ~10%
+- Fuentes citadas: 100%
+
+## 📝 Trazabilidad
+
+Cada consulta genera:
+
+1. **Log detallado** (`logs/test_dinosaurios.log`):
+   - Timestamps de cada paso
+   - Decisiones del orchestrator
+   - Llamadas a LLM
+   - Resultados de validación
+
+2. **Caso de uso JSON** (`results/casos_de_uso/caso_X.json`):
+   ```json
+   {
+     "query": "...",
+     "intent": "busqueda",
+     "strategy": "simple_rag",
+     "documents": 5,
+     "response": "...",
+     "validation_score": 0.9,
+     "metadata": {...}
+   }
+   ```
+
+3. **Batch completo** (`results/respuestas/test_dinosaurios_TIMESTAMP.json`):
+   - Todos los casos de una ejecución
+   - Estadísticas agregadas
+   - Distribución de intenciones
+
+## 📖 Documentación Adicional
+
+- `/docs/ARCHITECTURE.md` - Arquitectura detallada
+- `/docs/AUTONOMOUS_AGENTS_GUIDE.md` - Guía de agentes
+- `/docs/USAGE_GUIDE.md` - Guía de uso completa
+- `/docs/PROMPTS_REFERENCE.md` - Referencia de prompts
 
 ## 🐛 Troubleshooting
 
-### Error: No se encuentra el índice
+### Error: Vector store no encontrado
 ```bash
+# El índice ya existe en data/vectorstore/faiss_index/
+# Si es necesario reindexar:
 python main.py --index
 ```
 
-### Error: API Keys
-Verifica que `.env` contenga las claves correctas.
-
-### Error: Dependencias
+### Error: API Key inválida
 ```bash
-pip install -r requirements.txt --upgrade
+# Verifica .env:
+GROQ_API_KEY=gsk_...
 ```
 
-## 👥 Autores
+### Error: Rate limiting
+El sistema ya incluye delays de 1.5s entre llamadas. Si aún así tienes problemas, aumenta `API_DELAY` en los archivos de agentes.
 
-Práctica 3 - Procesamiento de Lenguaje Natural
-- Persona 1: Arquitectura, Orquestador y Clasificador
-- Persona 2: Ingestión, Limpieza, Embeddings y Vector Store
-- Persona 3: Recuperación, Generación y Validación
+### Tests fallan
+```bash
+# Verifica dependencias:
+pip install -r requirements.txt --upgrade
+
+# Verifica que el vector store existe:
+ls data/vectorstore/faiss_index/
+```
+
+## 👥 Equipo
+
+**Práctica 3 - Procesamiento de Lenguaje Natural**
+
+Sistema RAG autónomo con 4 agentes especializados, implementado con LangChain 1.1 y Groq LLM.
+
+## 🚀 Próximos Pasos
+
+- [ ] Interfaz de chat interactivo
+- [ ] Soporte multimodal (imágenes de dinosaurios)
+- [ ] Comparación con otros LLMs
+- [ ] Expansión a otros dominios
 
 ## 📄 Licencia
 
@@ -288,6 +411,15 @@ MIT License
 
 ## 🔗 Referencias
 
-- [LangChain Documentation](https://python.langchain.com/)
+- [LangChain 1.1](https://python.langchain.com/)
 - [FAISS](https://github.com/facebookresearch/faiss)
 - [Sentence Transformers](https://www.sbert.net/)
+- [Groq](https://groq.com/)
+- [Streamlit](https://streamlit.io/)
+
+---
+
+**Última actualización**: Diciembre 2025  
+**Dataset**: 100+ documentos científicos sobre dinosaurios  
+**Vector Store**: 6054 chunks indexados  
+**LLM**: Groq Llama-3.3-70b-versatile

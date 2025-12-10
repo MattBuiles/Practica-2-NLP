@@ -65,7 +65,7 @@ class AutonomousClassifierAgent:
 
 RESPONDE ÚNICAMENTE CON JSON VÁLIDO (sin markdown, sin explicaciones adicionales):
 
-{"intent": "busqueda", "confidence": 0.9, "requires_rag": true, "reasoning": "Breve explicación"}
+{{"intent": "busqueda", "confidence": 0.9, "requires_rag": true, "reasoning": "Breve explicación"}}
 
 CATEGORÍAS DE INTENCIÓN:
 
