@@ -9,7 +9,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from langchain.agents import create_agent
 
-from src.config.llm_config import get_classifier_llm
+from src.config.llm_config import get_retriever_llm
 from src.tools.document_loader_tool import (
     load_document,
     scan_directory_for_documents,
@@ -88,7 +88,7 @@ class AutonomousIndexerAgent:
     
     def __init__(self):
         """Inicializa el agente indexador autónomo."""
-        self.llm = get_classifier_llm()  # Gemini para razonamiento
+        self.llm = get_retriever_llm()  # Gemini para razonamiento
         self.tools = INDEXER_TOOLS
         
         # Crear prompt del sistema
@@ -220,19 +220,26 @@ Tipos de archivo: {file_types}
 Limpieza agresiva sugerida: {clean_aggressive}
 Guardar índice: {save_index}
 
-**Tu Trabajo:**
-1. Escanea el directorio para ver qué documentos hay
-2. Carga los documentos encontrados
-3. Procesa los documentos (limpieza + chunking)
-4. Verifica si existe índice activo
-5. Crea índice nuevo o agrega a existente según corresponda
-6. Guarda el índice si save_index=True
-7. Retorna estadísticas completas
+**IMPORTANTE - Gestión de Contexto:**
+- Procesa archivos en lotes PEQUEÑOS (máximo 5 archivos por batch)
+- Usa load_documents_batch para cargar múltiples archivos de una vez
+- NO registres cada archivo individual en tus decisiones
+- Resume tus acciones: "Procesando lote 1/N con 5 archivos"
 
-Ejecuta todas las herramientas necesarias de forma autónoma. Toma decisiones inteligentes basadas en la cantidad y tipo de documentos."""
+**Tu Trabajo:**
+1. Escanea el directorio para ver cuántos documentos hay
+2. Divide en lotes de MAX 5 archivos
+3. Para cada lote:
+   - Carga con load_documents_batch
+   - Procesa con process_documents_pipeline (limpieza + chunking)
+   - Agrega al índice
+4. Guarda el índice final si save_index=True
+5. Retorna estadísticas completas
+
+**OPTIMIZACIÓN:** Usa herramientas batch y mantén mensajes concisos para evitar límites de contexto."""
 
         try:
-            logger.info(f"🤖 Indexación autónoma iniciada: {directory_path}")
+            logger.info(f"[Indexer] Indexacion autonoma iniciada: {directory_path}")
             
             # Invocar con formato LangChain 1.1
             result = self.agent_executor.invoke({
@@ -241,7 +248,7 @@ Ejecuta todas las herramientas necesarias de forma autónoma. Toma decisiones in
                 ]
             })
             
-            logger.info("✅ Indexación autónoma completada")
+            logger.info("[Indexer] Indexacion autonoma completada")
             
             # Extraer respuesta del nuevo formato de mensajes
             messages = result.get('messages', [])
@@ -259,7 +266,7 @@ Ejecuta todas las herramientas necesarias de forma autónoma. Toma decisiones in
             }
             
         except Exception as e:
-            logger.error(f"❌ Error en indexación autónoma: {e}")
+            logger.error(f"[Indexer] Error en indexacion autonoma: {e}")
             return {
                 "status": "error",
                 "error": str(e),

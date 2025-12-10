@@ -49,7 +49,7 @@ def optimize_search_query(query: str, intent: str = "busqueda") -> str:
         llm = llm_config.get_retriever_llm()
         
         # Prompt de optimización
-        prompt = ChatPromptTemplate.from_messages([
+        prompt = ChtPromptTemplate.from_messages([
             ("system", """Eres un experto en optimización de consultas para búsqueda semántica.
 
 Tu tarea es reformular la consulta del usuario para mejorar la recuperación de documentos relevantes.
@@ -58,7 +58,7 @@ ESTRATEGIAS:
 1. Expandir con sinónimos y términos relacionados
 2. Eliminar palabras vacías no informativas ("qué", "dice", "sobre", etc.)
 3. Mantener la intención original
-4. Añadir contexto relevante del dominio
+4. Añadir contexto relevante del dominioa
 
 SEGÚN INTENCIÓN:
 - busqueda: Términos específicos y precisos

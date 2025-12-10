@@ -371,8 +371,7 @@ SOLO RESPONDE CON EL JSON, NADA MÁS."""
                 logger.info("\n[DECISIÓN] Estrategia: direct_response → Sin RAG")
                 logger.info("\n[DECISIÓN] Estrategia: direct_response → Sin RAG")
                 
-                # Respuesta directa usando RAGAgent (sin contexto documental)
-                #TODO ACTUALIZAR A USAR CLASSIFIER
+                # Respuesta directa usando clasificador 
                 generation_result = self.rag_agent.generate(
                     query=query,
                     documents=[],
