@@ -1,15 +1,16 @@
-"""
-Agente Clasificador Autónomo con Tools.
-Usa LangChain agent con capacidad de usar herramientas de forma autónoma.
+
+"""Agente Clasificador Autónomo.
+Clasifica intenciones directamente con el LLM sin usar herramientas.
 """
 import logging
 import time
+import json
+import re
 from typing import Dict, Any
-from langchain.agents import create_agent
+from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
 from src.config.llm_config import llm_config
-from src.tools import CLASSIFIER_TOOLS, classify_intent, log_agent_decision
 
 logger = logging.getLogger(__name__)
 
@@ -27,144 +28,78 @@ class IntentClassification(BaseModel):
 
 class AutonomousClassifierAgent:
     """
-    Agente Clasificador Autónomo basado en LangChain.
+    Agente Clasificador Autónomo.
     
-    Este agente es verdaderamente autónomo:
-    - Decide cuándo usar las tools disponibles
-    - Puede clasificar directamente o usar la tool classify_intent
-    - Registra sus decisiones automáticamente
-    - Razona sobre la mejor estrategia para cada consulta
-    
-    TOOLS DISPONIBLES:
-    - classify_intent: Clasificar intención usando LLM
-    - get_available_documents_info: Ver documentos disponibles
-    - log_agent_decision: Registrar decisiones
+    Clasifica intenciones directamente usando el LLM sin herramientas intermedias.
+    Esto es más eficiente y evita problemas de parsing con tools.
     
     CAPACIDADES:
     - Clasificación de intención (busqueda, resumen, comparacion, general)
     - Determinación de necesidad de RAG
     - Análisis contextual profundo
-    - Trazabilidad automática
     """
     
     def __init__(self):
         """
-        Inicializa el agente clasificador autónomo.
+        Inicializa el agente clasificador.
         
         Configura:
-        - LLM con capacidad de tool calling (Gemini 2.5 Flash)
-        - Tools específicas para clasificación
+        - LLM para clasificación (Groq)
         - Prompt con instrucciones detalladas
-        - AgentExecutor para ejecución autónoma
         """
         logger.info("Inicializando AutonomousClassifierAgent...")
         
-        # LLM con tool calling (Gemini - comprensión contextual)
+        # LLM para clasificación
         self.llm = llm_config.get_classifier_llm()
         
-        # Tools disponibles para este agente
-        self.tools = CLASSIFIER_TOOLS
-        
-        # Prompt del sistema para el agente
+        # Prompt del sistema
         self.system_prompt = self._create_system_prompt()
         
-        # Crear agente con langchain (retorna un grafo ejecutable)
-        self.agent_executor = create_agent(
-            model=self.llm,
-            tools=self.tools,
-            system_prompt=self.system_prompt
-        )
-        
-        logger.info(f"AutonomousClassifierAgent inicializado con {len(self.tools)} tools")
+        logger.info("AutonomousClassifierAgent inicializado (clasificación directa sin tools)")
     
     def _create_system_prompt(self) -> str:
         """
-        Crea el prompt del sistema para el agente autónomo.
-        
-        El prompt debe:
-        - Explicar claramente la tarea del agente
-        - Describir cuándo usar cada tool
-        - Proporcionar ejemplos de razonamiento
-        - Establecer el formato de salida esperado
+        Crea el prompt del sistema para clasificación directa.
         """
-        return """Eres un Agente Clasificador Autónomo experto en análisis de intenciones.
+        return """Eres un clasificador de intenciones experto.
 
-TU MISIÓN:
-Clasificar la intención del usuario en una de 4 categorías:
-1. **busqueda**: Usuario busca información específica en documentos
-2. **resumen**: Usuario quiere un resumen de documentos
-3. **comparacion**: Usuario quiere comparar conceptos/documentos
-4. **general**: Conversación general sin necesidad de documentos
+RESPONDE ÚNICAMENTE CON JSON VÁLIDO (sin markdown, sin explicaciones adicionales):
 
-HERRAMIENTAS DISPONIBLES:
-- classify_intent: Usa esta tool para clasificar la intención usando LLM especializado
-- get_available_documents_info: Consulta qué documentos están disponibles
-- log_agent_decision: Registra tu decisión para trazabilidad
+{"intent": "busqueda", "confidence": 0.9, "requires_rag": true, "reasoning": "Breve explicación"}
 
-ESTRATEGIA DE DECISIÓN:
+CATEGORÍAS DE INTENCIÓN:
 
-1. **Analiza la consulta cuidadosamente**:
-   - ¿Busca información específica? → busqueda
-   - ¿Pide resumen explícitamente? → resumen
-   - ¿Compara dos conceptos? → comparacion
-   - ¿Es conversacional? → general
+1. "busqueda": Usuario busca información específica
+   - Preguntas con: qué, cómo, cuándo, dónde, por qué, cuál
+   - Ejemplos: "¿Qué comían los dinosaurios?", "¿Cómo se extinguieron?"
+   - requires_rag: true
 
-2. **Usa classify_intent cuando**:
-   - La consulta es ambigua o compleja
-   - Necesitas análisis profundo del lenguaje
-   - Quieres una segunda opinión
+2. "resumen": Usuario quiere un resumen
+   - Palabras clave: resume, resumen, sintetiza, principales puntos
+   - Ejemplos: "Resume la información sobre T-Rex"
+   - requires_rag: true
 
-3. **Verifica documentos disponibles cuando**:
-   - El usuario pregunta sobre la disponibilidad de información
-   - Necesitas confirmar si hay contenido relevante
+3. "comparacion": Usuario quiere comparar conceptos
+   - Palabras clave: diferencia, comparar, vs, versus, entre
+   - Ejemplos: "Diferencias entre carnívoros y herbívoros"
+   - requires_rag: true
 
-4. **Registra tu decisión siempre**:
-   - Usa log_agent_decision para trazabilidad
-   - Incluye tu razonamiento completo
+4. "general": Conversación general sin necesidad de documentos
+   - Saludos, charla casual, preguntas sobre ti
+   - Ejemplos: "Hola", "¿Cómo estás?", "Gracias"
+   - requires_rag: false
 
-EJEMPLOS DE RAZONAMIENTO:
+VALORES:
+- intent: "busqueda" | "resumen" | "comparacion" | "general"
+- confidence: número entre 0.0 y 1.0
+- requires_rag: true | false (booleano)
+- reasoning: string breve explicando la decisión
 
-Ejemplo 1:
-Query: "¿Qué es la diabetes?"
-Razonamiento: "Es una pregunta directa sobre un concepto específico. 
-El usuario busca definición e información. Clasifico como 'busqueda' 
-con requires_rag=True."
+RECUERDA: Solo JSON, sin texto adicional."""
 
-Ejemplo 2:
-Query: "Resume el artículo sobre COVID"
-Razonamiento: "El usuario solicita explícitamente un resumen. 
-Clasifico como 'resumen' con requires_rag=True."
-
-Ejemplo 3:
-Query: "Hola, ¿cómo estás?"
-Razonamiento: "Es un saludo conversacional sin intención de buscar información. 
-Clasifico como 'general' con requires_rag=False."
-
-FORMATO DE RESPUESTA FINAL:
-Debes devolver un diccionario con:
-{{
-    "intent": "busqueda|resumen|comparacion|general",
-    "confidence": 0.0-1.0,
-    "requires_rag": true|false,
-    "reasoning": "Tu razonamiento detallado"
-}}
-
-IMPORTANTE:
-- Sé preciso y confiable
-- Explica claramente tu razonamiento
-- Usa las tools cuando sea apropiado
-- No inventes información"""
-    
     def classify(self, query: str) -> Dict[str, Any]:
         """
-        Clasifica la intención de una consulta de forma autónoma.
-        
-        El agente:
-        1. Analiza la consulta
-        2. Decide si usar tools o razonar directamente
-        3. Usa classify_intent si necesita análisis profundo
-        4. Registra su decisión con log_agent_decision
-        5. Retorna clasificación con razonamiento
+        Clasifica la intención de una consulta directamente con el LLM.
         
         Args:
             query: Consulta del usuario
@@ -175,8 +110,7 @@ IMPORTANTE:
                 "intent": str,
                 "confidence": float,
                 "requires_rag": bool,
-                "reasoning": str,
-                "intermediate_steps": list  # Pasos del agente
+                "reasoning": str
             }
         """
         try:
@@ -185,101 +119,125 @@ IMPORTANTE:
             # Delay para evitar rate limiting
             time.sleep(API_DELAY)
             
-            # Invocar agente autónomo con formato LangChain 1.1
-            # El nuevo formato usa 'messages' como lista de mensajes
-            result = self.agent_executor.invoke({
-                "messages": [
-                    {"role": "user", "content": f"Clasifica la siguiente consulta del usuario: {query}"}
-                ]
-            })
+            # Crear prompt para clasificación
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", self.system_prompt),
+                ("user", "Clasifica esta consulta: {query}")
+            ])
             
-            # Extraer resultado del nuevo formato (messages es una lista)
-            messages = result.get("messages", [])
+            # Invocar LLM directamente
+            messages = prompt.format_messages(query=query)
+            response = self.llm.invoke(messages)
             
-            # Procesar los mensajes para extraer información
-            output = ""
-            tool_calls = []
-            tool_results = []
+            # Parsear respuesta JSON
+            classification = self._parse_classification_response(response.content)
             
-            for msg in messages:
-                # AIMessage con respuesta final
-                if hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
-                    if hasattr(msg, 'tool_calls') and msg.tool_calls:
-                        tool_calls.extend(msg.tool_calls)
-                    elif msg.content:
-                        output = msg.content
-                # ToolMessage con resultados
-                elif hasattr(msg, 'tool_call_id'):
-                    try:
-                        import json
-                        tool_result = json.loads(msg.content) if isinstance(msg.content, str) else msg.content
-                        tool_results.append(tool_result)
-                    except:
-                        tool_results.append({"content": msg.content})
-            
-            logger.info(f"[AutonomousClassifier] Tool calls: {len(tool_calls)}, Tool results: {len(tool_results)}")
-            
-            # Parsear output
-            classification = self._parse_agent_output(output, tool_results)
-            
-            # Agregar pasos intermedios para trazabilidad
-            classification["intermediate_steps"] = [
-                {
-                    "action": tc.get("name", "unknown") if isinstance(tc, dict) else getattr(tc, 'name', 'unknown'),
-                    "input": str(tc.get("args", {}) if isinstance(tc, dict) else getattr(tc, 'args', {}))[:200],
-                    "output": str(tr)[:200] if tr else ""
-                }
-                for tc, tr in zip(tool_calls, tool_results + [None] * len(tool_calls))
-            ]
-            
-            logger.info(f"[AutonomousClassifier] Clasificado como: {classification['intent']}")
+            logger.info(f"[AutonomousClassifier] Clasificado como: {classification['intent']} (confianza: {classification['confidence']:.2f})")
             
             return classification
             
         except Exception as e:
             logger.error(f"[AutonomousClassifier] Error: {str(e)}")
-            # Fallback seguro
-            return {
-                "intent": "busqueda",
-                "confidence": 0.5,
-                "requires_rag": True,
-                "reasoning": f"Error en clasificación autónoma: {str(e)}",
-                "intermediate_steps": []
-            }
+            # Fallback con heurísticas simples
+            return self._fallback_classification(query, str(e))
     
-    def _parse_agent_output(self, output: str, tool_results: list) -> Dict[str, Any]:
+    def _parse_classification_response(self, content: str) -> Dict[str, Any]:
         """
-        Parsea la salida del agente para extraer clasificación estructurada.
+        Parsea la respuesta JSON del LLM con múltiples estrategias de fallback.
+        """
+        text = content.strip()
         
-        Args:
-            output: Salida final del agente
-            tool_results: Resultados de las tools ejecutadas
+        # 1. Limpiar markdown
+        text = text.replace('```json', '').replace('```', '').strip()
+        
+        # 2. Intentar encontrar y limpiar el JSON
+        # Buscar desde { hasta }
+        start_idx = text.find('{')
+        end_idx = text.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            json_str = text[start_idx:end_idx + 1]
             
-        Returns:
-            Diccionario con clasificación estructurada
+            # Normalizar el JSON: reemplazar newlines y espacios múltiples
+            json_str = ' '.join(json_str.split())
+            
+            try:
+                data = json.loads(json_str)
+                
+                # Extraer y validar campos
+                intent = str(data.get('intent', 'busqueda')).lower().strip()
+                if intent not in ['busqueda', 'resumen', 'comparacion', 'general']:
+                    intent = 'busqueda'
+                
+                confidence = data.get('confidence', 0.8)
+                if isinstance(confidence, str):
+                    try:
+                        confidence = float(confidence)
+                    except:
+                        confidence = 0.8
+                confidence = max(0.0, min(1.0, float(confidence)))
+                
+                requires_rag = data.get('requires_rag', True)
+                if isinstance(requires_rag, str):
+                    requires_rag = requires_rag.lower() in ['true', '1', 'yes', 'si']
+                
+                reasoning = str(data.get('reasoning', 'Clasificación automática'))
+                
+                return {
+                    "intent": intent,
+                    "confidence": confidence,
+                    "requires_rag": bool(requires_rag),
+                    "reasoning": reasoning
+                }
+            except json.JSONDecodeError as e:
+                logger.debug(f"JSON decode error: {e}, intentando inferir del texto")
+        
+        # 3. Si JSON falla, inferir del contenido
+        return self._infer_from_text(content)
+    
+    def _infer_from_text(self, text: str) -> Dict[str, Any]:
         """
-        # Buscar si hay resultados de classify_intent en tool_results
-        for result in tool_results:
-            if isinstance(result, dict) and 'intent' in result:
-                return result
+        Infiere la clasificación del texto cuando el JSON falla.
+        """
+        text_lower = text.lower()
         
-        # Si no se usó classify_intent, parsear el output del agente
-        # Buscar palabras clave en el output
-        output_lower = output.lower()
-        
-        intent = "busqueda"  # default
-        if "resumen" in output_lower:
+        intent = "busqueda"
+        if '"resumen"' in text_lower or "resumen" in text_lower:
             intent = "resumen"
-        elif "comparacion" in output_lower or "comparar" in output_lower:
+        elif '"comparacion"' in text_lower or "comparacion" in text_lower or "comparar" in text_lower:
             intent = "comparacion"
-        elif "general" in output_lower or "conversacion" in output_lower:
+        elif '"general"' in text_lower:
             intent = "general"
-        
-        requires_rag = intent != "general"
         
         return {
             "intent": intent,
-            "confidence": 0.75,  # Confianza media si no usó classify_intent
-            "requires_rag": requires_rag,
-            "reasoning": output
+            "confidence": 0.7,
+            "requires_rag": intent != "general",
+            "reasoning": "Inferido del contenido de la respuesta"
+        }
+    
+    def _fallback_classification(self, query: str, error: str) -> Dict[str, Any]:
+        """
+        Clasificación de respaldo usando heurísticas simples.
+        """
+        query_lower = query.lower()
+        
+        # Detectar comparación
+        if any(word in query_lower for word in ['diferencia', 'comparar', 'comparacion', 'vs', 'versus', 'entre']):
+            intent = "comparacion"
+        # Detectar resumen
+        elif any(word in query_lower for word in ['resume', 'resumen', 'sintetiza', 'principales']):
+            intent = "resumen"
+        # Detectar general
+        elif any(word in query_lower for word in ['hola', 'gracias', 'adios', 'como estas']):
+            intent = "general"
+        # Default: búsqueda
+        else:
+            intent = "busqueda"
+        
+        return {
+            "intent": intent,
+            "confidence": 0.6,
+            "requires_rag": intent != "general",
+            "reasoning": f"Clasificación por heurísticas (error original: {error[:100]})"
         }

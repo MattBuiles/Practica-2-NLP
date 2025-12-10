@@ -158,50 +158,60 @@ ESTRATEGIAS:
 SOLO RESPONDE CON EL JSON, NADA MÁS."""
     
     def _parse_json_response(self, text: str) -> Dict[str, Any]:
-        """Parsea respuesta JSON del LLM, manejando tipos incorrectos."""
-        # Limpiar markdown si existe
-        text = re.sub(r'```json\s*', '', text)
-        text = re.sub(r'```\s*', '', text)
-        text = text.strip()
+        """Parsea respuesta JSON del LLM con enfoque simple y robusto."""
+        # 1. Limpiar markdown
+        text = text.replace('```json', '').replace('```', '').strip()
         
-        # Primero intentar extraer campos con regex (más robusto)
-        strategy_match = re.search(r'"strategy"\s*:\s*"([^"]+)"', text)
-        docs_match = re.search(r'"num_documents"\s*:\s*(\d+)', text)
-        mode_match = re.search(r'"retrieval_mode"\s*:\s*"([^"]+)"', text)
-        validation_match = re.search(r'"needs_validation"\s*:\s*(true|false)', text, re.I)
-        reasoning_match = re.search(r'"reasoning"\s*:\s*"([^"]+)"', text)
+        # 2. Encontrar el JSON entre { y }
+        start_idx = text.find('{')
+        end_idx = text.rfind('}')
         
-        # Si encontramos los campos principales, construir respuesta directamente
-        if strategy_match:
-            return {
-                "strategy": strategy_match.group(1),
-                "num_documents": int(docs_match.group(1)) if docs_match else 5,
-                "retrieval_mode": mode_match.group(1) if mode_match else "standard",
-                "needs_validation": validation_match.group(1).lower() == 'true' if validation_match else True,
-                "reasoning": reasoning_match.group(1) if reasoning_match else "Extraído con regex"
-            }
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            json_str = text[start_idx:end_idx + 1]
+            
+            # Normalizar: colapsar todos los espacios y newlines
+            json_str = ' '.join(json_str.split())
+            
+            try:
+                data = json.loads(json_str)
+                
+                # Extraer y validar strategy
+                strategy = str(data.get('strategy', 'simple_rag')).lower().strip()
+                valid_strategies = ["direct_response", "simple_rag", "comparison_rag", "summary_rag", "multi_hop"]
+                if strategy not in valid_strategies:
+                    strategy = "simple_rag"
+                
+                # Extraer num_documents
+                num_docs = data.get('num_documents', 5)
+                if isinstance(num_docs, str):
+                    try:
+                        num_docs = int(num_docs)
+                    except:
+                        num_docs = 5
+                
+                # Extraer retrieval_mode
+                mode = str(data.get('retrieval_mode', 'standard'))
+                
+                # Extraer needs_validation
+                needs_val = data.get('needs_validation', True)
+                if isinstance(needs_val, str):
+                    needs_val = needs_val.lower() in ['true', '1', 'yes', 'si']
+                
+                # Extraer reasoning
+                reasoning = str(data.get('reasoning', 'Estrategia automática'))
+                
+                return {
+                    "strategy": strategy,
+                    "num_documents": int(num_docs),
+                    "retrieval_mode": mode,
+                    "needs_validation": bool(needs_val),
+                    "reasoning": reasoning
+                }
+                
+            except json.JSONDecodeError as e:
+                raise ValueError(f"JSON inválido: {e}")
         
-        # Si no, intentar parsear JSON completo
-        # Buscar JSON en el texto (manejar newlines)
-        text_clean = re.sub(r'\n\s*', ' ', text)
-        json_match = re.search(r'\{[^{}]+\}', text_clean)
-        if json_match:
-            text_clean = json_match.group()
-        
-        try:
-            data = json.loads(text_clean)
-        except json.JSONDecodeError:
-            # Fallback final
-            raise ValueError(f"No se pudo parsear JSON: {text[:200]}")
-        
-        # Corregir tipos (Groq a veces devuelve strings)
-        if 'num_documents' in data:
-            data['num_documents'] = int(data['num_documents']) if isinstance(data['num_documents'], str) else data['num_documents']
-        if 'needs_validation' in data:
-            if isinstance(data['needs_validation'], str):
-                data['needs_validation'] = data['needs_validation'].lower() == 'true'
-        
-        return data
+        raise ValueError(f"No se encontró JSON en: {text[:100]}")
     
     def _decide_strategy(self, query: str, classification: Dict[str, Any]) -> Dict[str, Any]:
         """

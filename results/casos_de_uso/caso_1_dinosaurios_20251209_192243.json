@@ -1,0 +1,34 @@
+{
+  "case_number": 1,
+  "timestamp": "20251209_192243",
+  "domain": "dinosaurios",
+  "query": "¿Cuáles fueron los dinosaurios más grandes que existieron?",
+  "response": "Los dinosaurios más grandes que existieron fueron los titanosaurios, como el Patagotitan, que eran unas diez veces más pesados que los animales terrestres más grandes que existen en la actualidad, como el elefante africano (Loxodonta africana). [Fuente 2]\n\n---\n**Referencias:**\n[Fuente 1]: Preparación de fósiles Cómo preparamos los especímenes para su exhibición  Museo\n[Fuente 2]: Why were dinosaurs so big The secrets of titanosaurs' super size  Natural Histor\n[Fuente 3]: ¿Qué pasa cuando encuentras un dinosaurio  Natural History Museum\n[Fuente 4]: Genoma de mamut lanudo reconstruido en 3D a partir de piel liofilizada\n[Fuente 5]: Las huellas de dinosaurios son la primera evidencia del pastoreo de especies mix",
+  "trace": {
+    "intent": "busqueda",
+    "strategy": "simple_rag",
+    "documents_used": 5,
+    "execution_time": 11.112266,
+    "validation_passed": false,
+    "intermediate_steps": 0,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  },
+  "metadata": {
+    "intent": "busqueda",
+    "documents_used": 5,
+    "execution_time": 11.112266,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  }
+}

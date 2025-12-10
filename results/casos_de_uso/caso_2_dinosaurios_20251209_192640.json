@@ -1,0 +1,34 @@
+{
+  "case_number": 2,
+  "timestamp": "20251209_192640",
+  "domain": "dinosaurios",
+  "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
+  "response": "No hay suficiente información en el contexto para responder a la pregunta sobre cómo usaba sus brazos el Tyrannosaurus rex. Sin embargo, se menciona en [Fuente 3] que se descubrió qué hizo el Tyrannosaurus rex con sus brazos, sugiriendo que podría haber información disponible en ese artículo específico, pero no se proporciona en el contexto dado.\n\n---\n**Referencias:**\n[Fuente 1]: Genoma de mamut lanudo reconstruido en 3D a partir de piel liofilizada\n[Fuente 2]: Las huellas de dinosaurios son la primera evidencia del pastoreo de especies mix\n[Fuente 3]: Los tiranosaurios jóvenes podrían haber comido alimentos completamente diferente\n[Fuente 4]: Preguntas y respuestas sobre el estegosaurio\n[Fuente 5]: Preguntas y respuestas sobre el estegosaurio",
+  "trace": {
+    "intent": "busqueda",
+    "strategy": "simple_rag",
+    "documents_used": 5,
+    "execution_time": 9.905395,
+    "validation_passed": false,
+    "intermediate_steps": 0,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  },
+  "metadata": {
+    "intent": "busqueda",
+    "documents_used": 5,
+    "execution_time": 9.905395,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  }
+}

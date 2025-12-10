@@ -1,7 +1,8 @@
 {
-  "timestamp": "2025-12-09T19:31:06.955484",
-  "total_casos": 10,
-  "resultados": [
+  "batch_name": "test_dinosaurios",
+  "timestamp": "20251209_192259",
+  "total_queries": 2,
+  "results": [
     {
       "caso": 1,
       "categoria": "Información General",
@@ -10,9 +11,9 @@
       "intent": "busqueda",
       "strategy": "simple_rag",
       "documents_used": 5,
-      "execution_time": 11.816813,
+      "execution_time": 11.112266,
       "validation_passed": false,
-      "export_path": "results\\casos_de_uso\\caso_1_dinosaurios_20251209_193051.json"
+      "export_path": "results\\casos_de_uso\\caso_1_dinosaurios_20251209_192243.json"
     },
     {
       "caso": 2,
@@ -22,9 +23,19 @@
       "intent": "busqueda",
       "strategy": "simple_rag",
       "documents_used": 5,
-      "execution_time": 9.882767,
+      "execution_time": 10.056547,
       "validation_passed": false,
-      "export_path": "results\\casos_de_uso\\caso_2_dinosaurios_20251209_193103.json"
+      "export_path": "results\\casos_de_uso\\caso_2_dinosaurios_20251209_192256.json"
     }
-  ]
+  ],
+  "summary": {
+    "total_documents_used": 10,
+    "average_execution_time": 10.5844065,
+    "intents": {
+      "busqueda": 2
+    },
+    "strategies": {
+      "simple_rag": 2
+    }
+  }
 }

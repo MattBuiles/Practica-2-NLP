@@ -25,7 +25,7 @@ from .validation_tool import (
     validate_response,
     check_hallucination
 )
-from .intent_classifier_tool import classify_intent
+# classify_intent ya no se usa - el classifier agent clasifica directamente
 from .logging_tool import (
     log_agent_decision,
     log_agent_action,
@@ -73,7 +73,7 @@ __all__ = [
     'generate_general_response',
     'validate_response',
     'check_hallucination',
-    'classify_intent',
+    # classify_intent eliminado - clasificación directa en classifier agent
     'log_agent_decision',
     'log_agent_action',
     'get_available_documents_info',
@@ -111,10 +111,7 @@ ALL_LANGCHAIN_TOOLS = [
     validate_response,
     check_hallucination,
     
-    # Clasificación
-    classify_intent,
-    
-    # Logging y trazabilidad
+    # Logging y trazabilidad (classify_intent eliminado)
     log_agent_decision,
     log_agent_action,
     get_available_documents_info,
@@ -158,7 +155,8 @@ CRITIC_TOOLS = [
 ]
 
 CLASSIFIER_TOOLS = [
-    classify_intent,
+    # El classifier agent ya no usa tools - clasifica directamente con el LLM
+    # Solo mantenemos logging para trazabilidad si se necesita
     get_available_documents_info,
     log_agent_decision,
 ]
