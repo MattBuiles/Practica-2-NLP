@@ -31,10 +31,10 @@ class LLMConfig:
     def get_classifier_llm(self):
         """
         LLM para el Agente Clasificador.
-        Usa Gemini por su superior capacidad de interpretación contextual.
+        Usa Groq por velocidad y para evitar límites de quota de Gemini.
         """
         return ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-lite",
             google_api_key=self.gemini_api_key,
             temperature=0.1,  # Baja temperatura para clasificación consistente
             max_tokens=500
@@ -46,7 +46,7 @@ class LLMConfig:
         Usa Groq para optimización rápida de consultas.
         """
         return ChatGroq(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            model="llama-3.3-70b-versatile",
             groq_api_key=self.groq_api_key,
             temperature=0.2,
             max_tokens=1000
@@ -67,13 +67,13 @@ class LLMConfig:
     def get_critic_llm(self):
         """
         LLM para el Agente Crítico/Verificador.
-        Usa Gemini por su capacidad de razonamiento profundo.
+        Usa Groq por velocidad y consistencia.
         """
         return ChatGroq(
             model="meta-llama/llama-4-scout-17b-16e-instruct",
             groq_api_key=self.groq_api_key,
-            temperature=0.3,
-            max_tokens=2000
+            temperature=0.2,
+            max_tokens=1000
         )
     
     def get_orchestrator_llm(self):

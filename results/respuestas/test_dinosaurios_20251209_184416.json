@@ -1,0 +1,41 @@
+{
+  "batch_name": "test_dinosaurios",
+  "timestamp": "20251209_184416",
+  "total_queries": 2,
+  "results": [
+    {
+      "caso": 1,
+      "categoria": "Información General",
+      "query": "¿Cuáles fueron los dinosaurios más grandes que existieron?",
+      "response": "Encontré 5 documentos relevantes, pero hubo un error al procesar la respuesta: Error code: 400 - {'error': {'message': 'tool call validation failed: parameters for tool generate_rag_response did not match schema: errors: [`/documents`: expected array, but got string]', 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'failed_generation': '[\\n  {\\n    \"name\": \"generate_rag_response\",\\n    \"parameters\": {\\n      \"documents\": \"5\",\\n      \"intent\": \"busqueda\",\\n      \"query\": \"\\\\u00bfCu\\\\u00e1les fueron los dinosaurios m\\\\u00e1s grandes que existieron?\"\\n    }\\n  }\\n]'}}",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 5,
+      "execution_time": 19.486868,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_1_dinosaurios_20251209_184338.json"
+    },
+    {
+      "caso": 2,
+      "categoria": "Anatomía y Características",
+      "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
+      "response": "Encontré 5 documentos relevantes, pero hubo un error al procesar la respuesta: Error code: 400 - {'error': {'message': \"Failed to call a function. Please adjust your prompt. See 'failed_generation' for more details.\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'failed_generation': '[\\n  {\\n    \"response\": El Tyrannosaurus rex utilizaba sus brazos de varias maneras:\\n\\n1. **Estabilizar presas**: Se cree que los usaba para estabilizar presas mientras las mordía o manipulaba.\\n2. **Levantarse**: Ayudarse a levantarse de posiciones acostadas.\\n3. **Interacciones sociales**: Posiblemente para interactuar socialmente con otros T. rex.\\n4. **Sujetar presas o manipular objetos**: Sus brazos musculosos y garras en forma de garra podrían haber sido utilizados para sujetar presas.\\n\\nEn general, se destaca que los brazos del T. rex eran fuertes y capaces de ejercer una considerable fuerza, a pesar de ser cortos.\\n  },\\n  {\\n    \"response\": {\"logged\": true, \"timestamp\": \"2025-12-09T18:44:04.326013\", \"success\": true}\\n  }\\n]'}}",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 5,
+      "execution_time": 31.861261,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_2_dinosaurios_20251209_184413.json"
+    }
+  ],
+  "summary": {
+    "total_documents_used": 10,
+    "average_execution_time": 25.6740645,
+    "intents": {
+      "busqueda": 2
+    },
+    "strategies": {
+      "simple_rag": 2
+    }
+  }
+}

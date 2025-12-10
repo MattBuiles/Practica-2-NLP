@@ -3,6 +3,9 @@ Orquestador Autónomo con Agentes y Tools.
 Coordina el flujo completo del sistema usando agentes autónomos con decisiones LLM.
 """
 import logging
+import time
+import json
+import re
 from typing import Dict, Any
 from datetime import datetime
 from langchain_core.prompts import ChatPromptTemplate
@@ -14,6 +17,9 @@ from src.agents.autonomous_rag_agent import AutonomousRAGAgent
 from src.agents.autonomous_critic_agent import AutonomousCriticAgent
 from src.config.llm_config import llm_config
 from src.rag_pipeline.vectorstore import vectorstore_manager
+
+# Delay entre llamadas API para evitar rate limiting
+API_DELAY = 1.5  # segundos
 
 logger = logging.getLogger(__name__)
 
@@ -101,12 +107,13 @@ class AutonomousOrchestrator:
         except Exception as e:
             logger.warning(f"⚠ Error cargando vector store: {e}")
         
-        # LLM para decisiones de orquestación (salida estructurada)
+        # LLM para decisiones de orquestación (SIN structured_output por incompatibilidad con Groq)
         logger.info("\n[6/6] Configurando LLM de Orquestación...")
         self.llm = llm_config.get_orchestrator_llm()
-        self.structured_llm = self.llm.with_structured_output(OrchestrationDecision)
+        # NO usar structured_output - Groq devuelve strings en vez de tipos correctos
+        # self.structured_llm = self.llm.with_structured_output(OrchestrationDecision)
         
-        # Prompt para decisiones
+        # Prompt para decisiones - ahora pide JSON explícito
         self.decision_prompt = ChatPromptTemplate.from_messages([
             ("system", self._get_decision_prompt()),
             ("user", "Consulta: {query}\nIntención: {intent}\nConfianza: {confidence}\nRequiere RAG: {requires_rag}")
@@ -125,62 +132,85 @@ class AutonomousOrchestrator:
         """Genera el prompt para decisiones de orquestación."""
         return """Eres un orquestador experto de sistemas RAG. Tu tarea es decidir la mejor estrategia para procesar consultas.
 
-IMPORTANTE - FORMATO DE RESPUESTA:
-- strategy: string (uno de: direct_response, simple_rag, comparison_rag, summary_rag, multi_hop)
-- num_documents: INTEGER (número entero como 0, 3, 5, 8 - NO usar strings como "5")
-- retrieval_mode: string (uno de: none, standard, comparison, summary)
-- needs_validation: BOOLEAN (true o false sin comillas - NO usar strings como "true")
-- reasoning: string (tu explicación)
+RESPONDE ÚNICAMENTE CON UN JSON VÁLIDO (sin markdown, sin explicaciones):
 
-ESTRATEGIAS DISPONIBLES:
+{
+  "strategy": "simple_rag",
+  "num_documents": 5,
+  "retrieval_mode": "standard",
+  "needs_validation": true,
+  "reasoning": "Explicación breve"
+}
 
-1. **direct_response**: Respuesta directa sin RAG (conversación, saludos, preguntas generales)
-   - num_documents: 0
-   - retrieval_mode: none
-   - needs_validation: false
+VALORES PERMITIDOS:
+- strategy: "direct_response", "simple_rag", "comparison_rag", "summary_rag", "multi_hop"
+- num_documents: 0, 3, 4, 5, 6, 8, 10 (número entero)
+- retrieval_mode: "none", "standard", "comparison", "summary"
+- needs_validation: true o false (booleano, NO string)
 
-2. **simple_rag**: Búsqueda simple de información específica
-   - num_documents: 4 o 5
-   - retrieval_mode: standard
-   - needs_validation: true
+ESTRATEGIAS:
+1. direct_response: Sin RAG (saludos, charla) → num_documents=0, retrieval_mode="none", needs_validation=false
+2. simple_rag: Búsqueda de información → num_documents=5, retrieval_mode="standard", needs_validation=true
+3. comparison_rag: Comparar conceptos → num_documents=6, retrieval_mode="comparison", needs_validation=true
+4. summary_rag: Resumir documentos → num_documents=8, retrieval_mode="summary", needs_validation=true
+5. multi_hop: Preguntas complejas → num_documents=6, retrieval_mode="standard", needs_validation=true
 
-3. **comparison_rag**: Comparación entre 2+ conceptos/documentos
-   - num_documents: 5 o 6
-   - retrieval_mode: comparison
-   - needs_validation: true
-
-4. **summary_rag**: Resumen de documentos
-   - num_documents: 8 o 10
-   - retrieval_mode: summary
-   - needs_validation: true
-
-5. **multi_hop**: Preguntas complejas que requieren múltiples consultas
-   - num_documents: 6 o 8
-   - retrieval_mode: standard
-   - needs_validation: true
-
-CRITERIOS DE DECISIÓN:
-- Analiza la complejidad y contexto de la consulta
-- Optimiza el número de documentos (más no siempre es mejor)
-- Valida respuestas técnicas, no conversaciones simples
-- Considera la intención clasificada pero usa tu criterio
-
-Responde SOLO con los campos del modelo OrchestrationDecision.
-"""
+SOLO RESPONDE CON EL JSON, NADA MÁS."""
+    
+    def _parse_json_response(self, text: str) -> Dict[str, Any]:
+        """Parsea respuesta JSON del LLM, manejando tipos incorrectos."""
+        # Limpiar markdown si existe
+        text = re.sub(r'```json\s*', '', text)
+        text = re.sub(r'```\s*', '', text)
+        text = text.strip()
+        
+        # Buscar JSON en el texto
+        json_match = re.search(r'\{[\s\S]*?\}', text)
+        if json_match:
+            text = json_match.group()
+        
+        # Intentar parsear JSON
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            # Limpiar newlines y reintentar
+            cleaned = re.sub(r'\n\s*', ' ', text)
+            try:
+                data = json.loads(cleaned)
+            except json.JSONDecodeError:
+                # Extraer campos manualmente
+                strategy_match = re.search(r'"strategy"\s*:\s*"(\w+)"', text)
+                docs_match = re.search(r'"num_documents"\s*:\s*(\d+)', text)
+                
+                if strategy_match:
+                    return {
+                        "strategy": strategy_match.group(1),
+                        "num_documents": int(docs_match.group(1)) if docs_match else 5,
+                        "retrieval_mode": "standard",
+                        "needs_validation": True,
+                        "reasoning": "Extraído manualmente"
+                    }
+                raise ValueError(f"No se pudo parsear JSON: {text[:200]}")
+        
+        # Corregir tipos (Groq a veces devuelve strings)
+        if 'num_documents' in data:
+            data['num_documents'] = int(data['num_documents']) if isinstance(data['num_documents'], str) else data['num_documents']
+        if 'needs_validation' in data:
+            if isinstance(data['needs_validation'], str):
+                data['needs_validation'] = data['needs_validation'].lower() == 'true'
+        
+        return data
     
     def _decide_strategy(self, query: str, classification: Dict[str, Any]) -> Dict[str, Any]:
         """
         Usa LLM para decidir la estrategia óptima de procesamiento.
-        
-        Args:
-            query: Consulta del usuario
-            classification: Clasificación de intención
-            
-        Returns:
-            Decisión de orquestación con salida estructurada
+        Parsea JSON manualmente en lugar de usar structured_output.
         """
         try:
             logger.info("→ Usando LLM para decidir estrategia de orquestación...")
+            
+            # Delay para evitar rate limiting
+            time.sleep(API_DELAY)
             
             messages = self.decision_prompt.format_messages(
                 query=query,
@@ -189,18 +219,19 @@ Responde SOLO con los campos del modelo OrchestrationDecision.
                 requires_rag=classification["requires_rag"]
             )
             
-            decision = self.structured_llm.invoke(messages)
+            response = self.llm.invoke(messages)
+            decision = self._parse_json_response(response.content)
             
             result = {
-                "strategy": decision.strategy,
-                "num_documents": decision.num_documents,
-                "retrieval_mode": decision.retrieval_mode,
-                "needs_validation": decision.needs_validation,
-                "reasoning": decision.reasoning
+                "strategy": decision.get("strategy", "simple_rag"),
+                "num_documents": int(decision.get("num_documents", 5)),
+                "retrieval_mode": decision.get("retrieval_mode", "standard"),
+                "needs_validation": bool(decision.get("needs_validation", True)),
+                "reasoning": decision.get("reasoning", "Sin razonamiento")
             }
             
-            logger.info(f"✓ Estrategia: {decision.strategy} | Docs: {decision.num_documents} | Validar: {decision.needs_validation}")
-            logger.info(f"  Razonamiento: {decision.reasoning[:150]}...")
+            logger.info(f"✓ Estrategia: {result['strategy']} | Docs: {result['num_documents']} | Validar: {result['needs_validation']}")
+            logger.info(f"  Razonamiento: {result['reasoning'][:150]}...")
             return result
             
         except Exception as e:

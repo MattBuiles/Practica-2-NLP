@@ -3,6 +3,7 @@ Agente Recuperador Autónomo con Tools.
 Busca y optimiza la recuperación de documentos de forma inteligente.
 """
 import logging
+import time
 from typing import Dict, Any, List
 from langchain.agents import create_agent
 from pydantic import BaseModel, Field
@@ -11,6 +12,9 @@ from src.config.llm_config import llm_config
 from src.tools import RETRIEVER_TOOLS
 
 logger = logging.getLogger(__name__)
+
+# Delay entre llamadas API para evitar rate limiting
+API_DELAY = 1.5
 
 
 class RetrievalResult(BaseModel):
@@ -160,6 +164,9 @@ IMPORTANTE:
         """
         try:
             logger.info(f"[AutonomousRetriever] Query: '{query[:80]}', intent: {intent}")
+            
+            # Delay para evitar rate limiting
+            time.sleep(API_DELAY)
             
             # Preparar mensaje para el agente - enfatizar la query real
             if k is not None:

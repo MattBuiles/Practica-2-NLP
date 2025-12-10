@@ -3,6 +3,9 @@ Tool para clasificar intención de consultas.
 Determina si el usuario busca información, resumen, comparación o conversación general.
 """
 import logging
+import json
+import re
+import time
 from typing import Dict, Any
 from langchain_core.tools import tool
 from langchain_core.prompts import ChatPromptTemplate
@@ -11,6 +14,69 @@ from pydantic import BaseModel, Field
 from src.config.llm_config import llm_config
 
 logger = logging.getLogger(__name__)
+
+# Delay entre llamadas API
+API_DELAY = 1.0
+
+
+def _parse_classification_json(text: str) -> Dict[str, Any]:
+    """Parsea respuesta JSON de clasificación, corrigiendo tipos."""
+    # Limpiar markdown y espacios
+    text = re.sub(r'```json\s*', '', text)
+    text = re.sub(r'```\s*', '', text)
+    text = text.strip()
+    
+    # Intentar encontrar JSON en el texto
+    json_match = re.search(r'\{[^{}]*\}', text)
+    if json_match:
+        text = json_match.group()
+    
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        # Intentar limpiar newlines y volver a parsear
+        cleaned = re.sub(r'\n\s*', ' ', text)
+        try:
+            data = json.loads(cleaned)
+        except json.JSONDecodeError:
+            # Último intento: extraer campos manualmente con regex
+            intent_match = re.search(r'"intent"\s*:\s*"(\w+)"', text)
+            conf_match = re.search(r'"confidence"\s*:\s*([\d.]+)', text)
+            rag_match = re.search(r'"requires_rag"\s*:\s*(true|false)', text, re.I)
+            
+            if intent_match:
+                return {
+                    "intent": intent_match.group(1),
+                    "confidence": float(conf_match.group(1)) if conf_match else 0.7,
+                    "requires_rag": rag_match.group(1).lower() == 'true' if rag_match else True,
+                    "reasoning": "Extraído manualmente de respuesta"
+                }
+            
+            # Fallback final: analizar texto para inferir intent
+            text_lower = text.lower()
+            if "compar" in text_lower:
+                intent = "comparacion"
+            elif "resum" in text_lower:
+                intent = "resumen"
+            elif "general" in text_lower or "salud" in text_lower:
+                intent = "general"
+            else:
+                intent = "busqueda"
+            return {
+                "intent": intent,
+                "confidence": 0.6,
+                "requires_rag": intent != "general",
+                "reasoning": f"Inferido del texto: {text[:100]}"
+            }
+    
+    # Si llegamos aquí, data fue parseado correctamente
+    # Corregir tipos si es necesario
+    if 'confidence' in data and isinstance(data['confidence'], str):
+        data['confidence'] = float(data['confidence'])
+    if 'requires_rag' in data and isinstance(data['requires_rag'], str):
+        data['requires_rag'] = data['requires_rag'].lower() == 'true'
+        
+    return data
 
 
 class IntentClassification(BaseModel):
@@ -74,54 +140,49 @@ def classify_intent(query: str) -> Dict[str, Any]:
     try:
         logger.info(f"Clasificando intención de: '{query}'")
         
-        # Configurar LLM para clasificación (Gemini - comprensión contextual)
+        # Delay para evitar rate limiting
+        time.sleep(API_DELAY)
+        
+        # Configurar LLM para clasificación (SIN structured_output)
         llm = llm_config.get_classifier_llm()
-        structured_llm = llm.with_structured_output(IntentClassification)
         
         prompt = ChatPromptTemplate.from_messages([
             ("system", """Eres un experto en clasificación de intenciones para sistemas RAG.
 
-Clasifica la consulta en UNA de estas 4 categorías:
+RESPONDE ÚNICAMENTE CON JSON VÁLIDO (sin markdown):
 
-1. **busqueda**: Busca información específica en documentos
-   - Preguntas tipo qué, cómo, cuándo, dónde
-   - Solicitudes de explicación o definición
-   - Búsqueda de datos o hechos concretos
-   - Requires RAG: SÍ
+{
+  "intent": "busqueda",
+  "confidence": 0.9,
+  "requires_rag": true,
+  "reasoning": "El usuario busca información específica"
+}
 
-2. **resumen**: Solicita resumen de documentos
-   - Palabras clave: "resume", "resumen", "sintetiza"
-   - Referencias explícitas a documentos
-   - Requires RAG: SÍ
+CATEGORÍAS (intent):
+1. "busqueda": Busca información específica (qué, cómo, cuándo) → requires_rag=true
+2. "resumen": Solicita resumen de documentos → requires_rag=true  
+3. "comparacion": Quiere comparar conceptos (vs, diferencia) → requires_rag=true
+4. "general": Conversación general (saludos, charla) → requires_rag=false
 
-3. **comparacion**: Quiere comparar conceptos o documentos
-   - Palabras clave: "compara", "diferencia", "vs", "versus"
-   - Menciona dos o más elementos a contrastar
-   - Requires RAG: SÍ
+VALORES:
+- intent: string ("busqueda", "resumen", "comparacion", "general")
+- confidence: número 0.0 a 1.0
+- requires_rag: booleano (true/false)
+- reasoning: string breve
 
-4. **general**: Conversación general sin necesidad de documentos
-   - Saludos, despedidas
-   - Preguntas sobre el sistema
-   - Charla casual
-   - Requires RAG: NO
-
-IMPORTANTE:
-- Analiza el contexto completo, no solo palabras clave
-- Si hay duda, prioriza: comparacion > resumen > busqueda > general
-- Asigna confianza honesta (0.0 a 1.0)
-
-Responde SOLO con los campos del modelo IntentClassification."""),
+SOLO RESPONDE CON JSON."""),
             ("user", "{query}")
         ])
         
         messages = prompt.format_messages(query=query)
-        classification = structured_llm.invoke(messages)
+        response = llm.invoke(messages)
+        classification = _parse_classification_json(response.content)
         
         result = {
-            "intent": classification.intent,
-            "confidence": classification.confidence,
-            "requires_rag": classification.requires_rag,
-            "reasoning": classification.reasoning
+            "intent": classification.get("intent", "busqueda"),
+            "confidence": float(classification.get("confidence", 0.7)),
+            "requires_rag": bool(classification.get("requires_rag", True)),
+            "reasoning": classification.get("reasoning", "Sin razonamiento")
         }
         
         logger.info(f"Intención clasificada: {result['intent']} (confianza: {result['confidence']:.2f})")

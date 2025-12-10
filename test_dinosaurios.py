@@ -395,10 +395,22 @@ def generar_reporte_final(resultados: list):
 
 def main():
     """Función principal del test."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Test de Sistema RAG - Dinosaurios')
+    parser.add_argument('--casos', '-n', type=int, default=10, 
+                       help='Número de casos a ejecutar (default: 10)')
+    parser.add_argument('--debug', '-d', action='store_true',
+                       help='Modo debug: ejecuta solo 2 casos')
+    args = parser.parse_args()
+    
+    num_casos = 2 if args.debug else args.casos
+    casos_a_ejecutar = CASOS_DE_USO[:num_casos]
+    
     print("\n" + "="*70)
     print("🦖 TEST DE SISTEMA RAG - DINOSAURIOS")
     print("="*70)
-    print("Ejecutando 10 casos de uso sobre el dataset de dinosaurios")
+    print(f"Ejecutando {len(casos_a_ejecutar)} casos de uso sobre el dataset de dinosaurios")
     print("="*70 + "\n")
     
     logger.info("=== Iniciando Test de Dinosaurios ===")
@@ -426,14 +438,15 @@ def main():
     resultados = []
     
     print("🚀 Iniciando casos de uso...\n")
-    logger.info(f"Ejecutando {len(CASOS_DE_USO)} casos de uso")
+    logger.info(f"Ejecutando {len(casos_a_ejecutar)} casos de uso")
     
-    for caso in CASOS_DE_USO:
+    for caso in casos_a_ejecutar:
         resultado = ejecutar_caso_de_uso(caso, orchestrator)
         resultados.append(resultado)
         
-        # Pausa breve entre casos
-        time.sleep(1)
+        # Pausa breve entre casos para evitar rate limiting
+        print("\n⏳ Pausa entre casos (3s)...")
+        time.sleep(3)
     
     # Generar reporte final
     generar_reporte_final(resultados)

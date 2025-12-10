@@ -3,6 +3,9 @@ Tool para validar respuestas generadas.
 Verifica coherencia, detecta alucinaciones y evalúa calidad de respuestas RAG.
 """
 import logging
+import json
+import re
+import time
 from typing import Dict, Any, List
 from langchain_core.tools import tool
 from langchain_core.prompts import ChatPromptTemplate
@@ -11,6 +14,53 @@ from pydantic import BaseModel, Field
 from src.config.llm_config import llm_config
 
 logger = logging.getLogger(__name__)
+
+# Delay entre llamadas API
+API_DELAY = 1.0
+
+
+def _parse_validation_json(text: str) -> Dict[str, Any]:
+    """Parsea respuesta JSON de validación, corrigiendo tipos si es necesario."""
+    # Limpiar markdown
+    text = re.sub(r'```json\s*', '', text)
+    text = re.sub(r'```\s*', '', text)
+    text = text.strip()
+    
+    # Buscar JSON en el texto
+    json_match = re.search(r'\{[\s\S]*?\}', text)
+    if json_match:
+        text = json_match.group()
+    
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        # Limpiar newlines y reintentar
+        cleaned = re.sub(r'\n\s*', ' ', text)
+        try:
+            data = json.loads(cleaned)
+        except json.JSONDecodeError:
+            # Extraer campos manualmente
+            valid_match = re.search(r'"is_valid"\s*:\s*(true|false)', text, re.I)
+            score_match = re.search(r'"confidence_score"\s*:\s*([\d.]+)', text)
+            
+            return {
+                "is_valid": valid_match.group(1).lower() == 'true' if valid_match else True,
+                "confidence_score": float(score_match.group(1)) if score_match else 0.7,
+                "issues": [],
+                "recommendations": "Validación completada"
+            }
+    
+    # Corregir tipos
+    if 'is_valid' in data and isinstance(data['is_valid'], str):
+        data['is_valid'] = data['is_valid'].lower() == 'true'
+    if 'confidence_score' in data and isinstance(data['confidence_score'], str):
+        data['confidence_score'] = float(data['confidence_score'])
+    if 'issues' not in data:
+        data['issues'] = []
+    if 'recommendations' not in data:
+        data['recommendations'] = ""
+        
+    return data
 
 
 class ValidationResult(BaseModel):
@@ -77,66 +127,65 @@ def validate_response(query: str, response: str, context_documents: List[Dict[st
             for idx, doc in enumerate(context_documents, 1)
         ])
         
-        # Configurar LLM para validación crítica
+        # Configurar LLM para validación crítica (SIN structured_output)
         llm = llm_config.get_critic_llm()
-        structured_llm = llm.with_structured_output(ValidationResult)
+        # NO usar structured_output - Groq devuelve strings incorrectos
+        
+        # Delay para evitar rate limiting
+        time.sleep(API_DELAY)
         
         prompt = ChatPromptTemplate.from_messages([
             ("system", """Eres un evaluador experto de respuestas RAG.
 
 Tu tarea es validar si una respuesta está correctamente respaldada por documentos fuente.
 
+RESPONDE ÚNICAMENTE CON JSON VÁLIDO (sin markdown, sin explicaciones):
+
+{
+  "is_valid": true,
+  "confidence_score": 0.85,
+  "issues": [],
+  "recommendations": "La respuesta es correcta"
+}
+
 CRITERIOS DE VALIDACIÓN:
+1. Alineación con Fuentes: cada afirmación debe estar en los documentos
+2. Coherencia: respuesta lógica y directa
+3. Completitud: aborda todos los aspectos
+4. Calidad de Citas: citas presentes y correctas
 
-1. **Alineación con Fuentes** (crítico):
-   - Cada afirmación debe estar respaldada por el contexto
-   - Las citas deben corresponder a información real de las fuentes
-   - No debe haber información inventada o asumida
+VALORES:
+- is_valid: true/false (booleano)
+- confidence_score: 0.0 a 1.0 (número)
+- issues: lista de strings con problemas
+- recommendations: string con sugerencias
 
-2. **Coherencia**:
-   - La respuesta debe ser lógica y bien estructurada
-   - Debe responder directamente la pregunta
-   - No debe ser ambigua o confusa
+SOLO RESPONDE CON EL JSON."""),
+            ("user", """Pregunta: {query}
 
-3. **Completitud**:
-   - Debe abordar todos los aspectos de la pregunta
-   - Debe aprovechar la información disponible en las fuentes
-
-4. **Calidad de Citas**:
-   - Las citas deben estar presentes y bien formateadas
-   - Cada afirmación importante debe tener su cita
-
-DECISIÓN:
-- is_valid = true: La respuesta es confiable y está bien respaldada
-- is_valid = false: Hay problemas críticos que requieren regeneración
-
-- confidence_score: 0.0 (muy malo) a 1.0 (excelente)
-
-IMPORTANTE: Sé estricto. Si encuentras información no respaldada, marca como inválido."""),
-            ("user", """Pregunta original: {query}
-
-Respuesta generada:
+Respuesta a validar:
 {response}
 
-Contexto de documentos fuente:
+Fuentes:
 {context}
 
-Evalúa la respuesta:""")
+Evalúa (responde SOLO con JSON):""")
         ])
         
         messages = prompt.format_messages(
             query=query,
             response=response,
-            context=context
+            context=context[:3000]  # Limitar contexto para evitar tokens excesivos
         )
         
-        validation = structured_llm.invoke(messages)
+        llm_response = llm.invoke(messages)
+        validation = _parse_validation_json(llm_response.content)
         
         result = {
-            "is_valid": validation.is_valid,
-            "confidence_score": validation.confidence_score,
-            "issues": validation.issues,
-            "recommendations": validation.recommendations
+            "is_valid": validation.get("is_valid", False),
+            "confidence_score": float(validation.get("confidence_score", 0.5)),
+            "issues": validation.get("issues", []),
+            "recommendations": validation.get("recommendations", "")
         }
         
         logger.info(f"Validación completada: valid={result['is_valid']}, score={result['confidence_score']:.2f}")

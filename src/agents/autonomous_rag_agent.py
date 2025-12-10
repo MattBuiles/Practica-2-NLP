@@ -3,6 +3,7 @@ Agente RAG Autónomo con Tools.
 Genera respuestas basadas en contexto de forma inteligente y adaptativa.
 """
 import logging
+import time
 from typing import Dict, Any, List
 from langchain.agents import create_agent
 from pydantic import BaseModel, Field
@@ -11,6 +12,9 @@ from src.config.llm_config import llm_config
 from src.tools import RAG_TOOLS
 
 logger = logging.getLogger(__name__)
+
+# Delay entre llamadas API para evitar rate limiting
+API_DELAY = 1.5
 
 
 class RAGResponse(BaseModel):
@@ -176,12 +180,8 @@ IMPORTANTE:
         """
         Genera respuesta de forma autónoma.
         
-        El agente:
-        1. Analiza query, documentos e intención
-        2. Decide qué tool usar (RAG o general)
-        3. Genera respuesta con estilo apropiado
-        4. Registra la acción
-        5. Retorna respuesta y metadata
+        NOTA: Genera directamente con LLM en vez de usar tools porque
+        Groq tiene problemas pasando arrays como parámetros de tools.
         
         Args:
             query: Consulta del usuario
@@ -189,69 +189,32 @@ IMPORTANTE:
             intent: Tipo de intención (busqueda, resumen, comparacion, general)
             
         Returns:
-            Diccionario con respuesta generada:
-            {
-                "response": str,  # Respuesta generada
-                "used_rag": bool,  # Si usó RAG o respuesta general
-                "num_documents": int,  # Documentos usados
-                "intermediate_steps": list  # Acciones del agente
-            }
+            Diccionario con respuesta generada
         """
         try:
             logger.info(f"[AutonomousRAG] Query: '{query[:80]}', docs: {len(documents)}, intent: {intent}")
             
-            # Preparar input para el agente
-            # IMPORTANTE: Pasar documentos como contexto, no en el input string
-            agent_input = {
-                "query": query,
-                "intent": intent,
-                "num_documents": len(documents),
-                "input": f"Query: {query}\nIntent: {intent}\nDocumentos disponibles: {len(documents)}"
-            }
+            # Delay para evitar rate limiting
+            time.sleep(API_DELAY)
             
-            # Ejecutar agente con formato LangChain 1.1
-            result = self.agent_executor.invoke({
-                "messages": [
-                    {"role": "user", "content": f"Query: {query}\nIntent: {intent}\nDocumentos disponibles: {len(documents)}\n\nGenera una respuesta apropiada."}
-                ]
-            })
+            # Si no hay documentos y es intent general, respuesta conversacional
+            if not documents and intent == "general":
+                response = self._generate_general_response(query)
+                return {
+                    "response": response,
+                    "used_rag": False,
+                    "num_documents": 0,
+                    "intermediate_steps": [{"action": "general_response"}]
+                }
             
-            # Extraer respuesta del nuevo formato de mensajes
-            messages = result.get("messages", [])
-            response_text = ""
-            tool_calls = []
-            used_rag = False
-            
-            for msg in messages:
-                # AIMessage con tool_calls
-                if hasattr(msg, 'tool_calls') and msg.tool_calls:
-                    tool_calls.extend(msg.tool_calls)
-                    for tc in msg.tool_calls:
-                        tool_name = tc.get("name", "") if isinstance(tc, dict) else getattr(tc, 'name', '')
-                        if 'rag_response' in tool_name:
-                            used_rag = True
-                # AIMessage con respuesta final
-                elif hasattr(msg, 'content') and msg.content and not hasattr(msg, 'tool_call_id'):
-                    response_text = msg.content
-                # ToolMessage con resultados
-                elif hasattr(msg, 'tool_call_id') and hasattr(msg, 'content'):
-                    # Si la tool generó la respuesta, usarla
-                    if msg.content and len(msg.content) > 50:
-                        response_text = msg.content
-            
-            logger.info(f"[AutonomousRAG] Respuesta generada ({len(response_text)} chars), RAG={used_rag}")
+            # Generar respuesta RAG directamente (sin pasar por agent/tools)
+            response = self._generate_rag_response_direct(query, documents, intent)
             
             return {
-                "response": response_text,
-                "used_rag": used_rag,
+                "response": response,
+                "used_rag": True,
                 "num_documents": len(documents),
-                "intermediate_steps": [
-                    {
-                        "tool": tc.get("name", "unknown") if isinstance(tc, dict) else getattr(tc, 'name', 'unknown'),
-                        "preview": str(tc.get("args", {}) if isinstance(tc, dict) else getattr(tc, 'args', {}))[:200]
-                    }
-                    for tc in tool_calls
-                ]
+                "intermediate_steps": [{"action": "rag_response", "docs": len(documents)}]
             }
             
         except Exception as e:
@@ -259,9 +222,9 @@ IMPORTANTE:
             
             # Fallback: generar respuesta básica
             if documents and intent != "general":
-                fallback = f"Encontré {len(documents)} documentos relevantes, pero hubo un error al procesar la respuesta: {str(e)}"
+                fallback = f"Encontré {len(documents)} documentos relevantes, pero hubo un error al procesar: {str(e)}"
             else:
-                fallback = f"Disculpa, hubo un error al generar la respuesta: {str(e)}"
+                fallback = f"Disculpa, hubo un error: {str(e)}"
             
             return {
                 "response": fallback,
@@ -270,3 +233,51 @@ IMPORTANTE:
                 "error": str(e),
                 "intermediate_steps": []
             }
+    
+    def _generate_rag_response_direct(self, query: str, documents: List[Dict[str, Any]], intent: str) -> str:
+        """Genera respuesta RAG directamente con el LLM, sin pasar por tools."""
+        # Preparar contexto de documentos
+        context_parts = []
+        for idx, doc in enumerate(documents[:5], 1):  # Limitar a 5 docs
+            source = doc.get('metadata', {}).get('source', 'Documento')
+            content = doc.get('content', '')[:800]  # Limitar contenido
+            context_parts.append(f"[Fuente {idx}]: {content}")
+        
+        context = "\n\n".join(context_parts)
+        
+        # Seleccionar instrucciones según intent
+        if intent == "resumen":
+            instructions = "Crea un RESUMEN estructurado. Usa viñetas, destaca puntos clave."
+        elif intent == "comparacion":
+            instructions = "Haz una COMPARACIÓN punto por punto. Destaca similitudes y diferencias."
+        else:
+            instructions = "Responde de forma DIRECTA y PRECISA. Sé conciso."
+        
+        prompt = f"""Responde la siguiente pregunta usando SOLO la información del contexto.
+
+PREGUNTA: {query}
+
+CONTEXTO:
+{context}
+
+INSTRUCCIONES:
+- {instructions}
+- Cita las fuentes usando [Fuente X]
+- NO inventes información
+- Si no hay suficiente información, indícalo
+
+RESPUESTA:"""
+        
+        response = self.llm.invoke(prompt)
+        return response.content
+    
+    def _generate_general_response(self, query: str) -> str:
+        """Genera respuesta conversacional sin RAG."""
+        prompt = f"""Eres un asistente amigable sobre dinosaurios y paleontología.
+        
+Responde de forma conversacional a: {query}
+
+Sé breve y amigable."""
+        
+        response = self.llm.invoke(prompt)
+        return response.content

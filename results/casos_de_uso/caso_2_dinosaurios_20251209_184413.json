@@ -1,0 +1,34 @@
+{
+  "case_number": 2,
+  "timestamp": "20251209_184413",
+  "domain": "dinosaurios",
+  "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
+  "response": "Encontré 5 documentos relevantes, pero hubo un error al procesar la respuesta: Error code: 400 - {'error': {'message': \"Failed to call a function. Please adjust your prompt. See 'failed_generation' for more details.\", 'type': 'invalid_request_error', 'code': 'tool_use_failed', 'failed_generation': '[\\n  {\\n    \"response\": El Tyrannosaurus rex utilizaba sus brazos de varias maneras:\\n\\n1. **Estabilizar presas**: Se cree que los usaba para estabilizar presas mientras las mordía o manipulaba.\\n2. **Levantarse**: Ayudarse a levantarse de posiciones acostadas.\\n3. **Interacciones sociales**: Posiblemente para interactuar socialmente con otros T. rex.\\n4. **Sujetar presas o manipular objetos**: Sus brazos musculosos y garras en forma de garra podrían haber sido utilizados para sujetar presas.\\n\\nEn general, se destaca que los brazos del T. rex eran fuertes y capaces de ejercer una considerable fuerza, a pesar de ser cortos.\\n  },\\n  {\\n    \"response\": {\"logged\": true, \"timestamp\": \"2025-12-09T18:44:04.326013\", \"success\": true}\\n  }\\n]'}}",
+  "trace": {
+    "intent": "busqueda",
+    "strategy": "simple_rag",
+    "documents_used": 5,
+    "execution_time": 31.861261,
+    "validation_passed": false,
+    "intermediate_steps": 0,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  },
+  "metadata": {
+    "intent": "busqueda",
+    "documents_used": 5,
+    "execution_time": 31.861261,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  }
+}

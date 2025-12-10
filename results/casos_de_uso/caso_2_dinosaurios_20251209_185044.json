@@ -1,0 +1,34 @@
+{
+  "case_number": 2,
+  "timestamp": "20251209_185044",
+  "domain": "dinosaurios",
+  "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
+  "response": "No hay suficiente información para responder a la pregunta sobre cómo usaba sus brazos el Tyrannosaurus rex. Sin embargo, se menciona en [Fuente 3] que se descubrió qué hizo el Tyrannosaurus rex con sus brazos, pero no se proporciona más información en el contexto dado.",
+  "trace": {
+    "intent": "busqueda",
+    "strategy": "simple_rag",
+    "documents_used": 5,
+    "execution_time": 83.738014,
+    "validation_passed": false,
+    "intermediate_steps": 0,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  },
+  "metadata": {
+    "intent": "busqueda",
+    "documents_used": 5,
+    "execution_time": 83.738014,
+    "agents_called": [
+      "classifier",
+      "retriever",
+      "rag_agent",
+      "critic"
+    ],
+    "tools_used": []
+  }
+}

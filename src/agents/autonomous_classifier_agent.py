@@ -3,6 +3,7 @@ Agente Clasificador Autónomo con Tools.
 Usa LangChain agent con capacidad de usar herramientas de forma autónoma.
 """
 import logging
+import time
 from typing import Dict, Any
 from langchain.agents import create_agent
 from pydantic import BaseModel, Field
@@ -11,6 +12,9 @@ from src.config.llm_config import llm_config
 from src.tools import CLASSIFIER_TOOLS, classify_intent, log_agent_decision
 
 logger = logging.getLogger(__name__)
+
+# Delay entre llamadas API para evitar rate limiting
+API_DELAY = 1.5
 
 
 class IntentClassification(BaseModel):
@@ -177,6 +181,9 @@ IMPORTANTE:
         """
         try:
             logger.info(f"[AutonomousClassifier] Procesando: '{query[:100]}'")
+            
+            # Delay para evitar rate limiting
+            time.sleep(API_DELAY)
             
             # Invocar agente autónomo con formato LangChain 1.1
             # El nuevo formato usa 'messages' como lista de mensajes

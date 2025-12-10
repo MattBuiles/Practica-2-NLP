@@ -1,0 +1,41 @@
+{
+  "batch_name": "test_dinosaurios",
+  "timestamp": "20251209_185047",
+  "total_queries": 2,
+  "results": [
+    {
+      "caso": 1,
+      "categoria": "Información General",
+      "query": "¿Cuáles fueron los dinosaurios más grandes que existieron?",
+      "response": "Los dinosaurios más grandes que existieron fueron los titanosaurios, como el Patagotitan, que eran aproximadamente diez veces más pesados que los animales terrestres más grandes actuales, como el elefante africano (Loxodonta africana). [Fuente 2]",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 5,
+      "execution_time": 16.243947,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_1_dinosaurios_20251209_184917.json"
+    },
+    {
+      "caso": 2,
+      "categoria": "Anatomía y Características",
+      "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
+      "response": "No hay suficiente información para responder a la pregunta sobre cómo usaba sus brazos el Tyrannosaurus rex. Sin embargo, se menciona en [Fuente 3] que se descubrió qué hizo el Tyrannosaurus rex con sus brazos, pero no se proporciona más información en el contexto dado.",
+      "intent": "busqueda",
+      "strategy": "simple_rag",
+      "documents_used": 5,
+      "execution_time": 83.738014,
+      "validation_passed": false,
+      "export_path": "results\\casos_de_uso\\caso_2_dinosaurios_20251209_185044.json"
+    }
+  ],
+  "summary": {
+    "total_documents_used": 10,
+    "average_execution_time": 49.990980500000006,
+    "intents": {
+      "busqueda": 2
+    },
+    "strategies": {
+      "simple_rag": 2
+    }
+  }
+}
