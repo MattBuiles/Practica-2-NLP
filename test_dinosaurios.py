@@ -41,9 +41,9 @@ CASOS_DE_USO = [
     },
     {
         "numero": 2,
-        "categoria": "Anatomía y Características",
-        "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
-        "descripcion": "Consulta específica sobre T-Rex - requiere documento específico"
+        "categoria": "General (sin RAG)",
+        "query": "¡Hola! ¿Cómo estás hoy?",
+        "descripcion": "Saludo general - debe ser clasificado como 'general' y no requerir RAG"
     },
     {
         "numero": 3,
@@ -78,8 +78,8 @@ CASOS_DE_USO = [
     {
         "numero": 8,
         "categoria": "Anatomía Comparativa",
-        "query": "¿Qué diferencias hay entre el Stegosaurus y el Ankylosaurus?",
-        "descripcion": "Comparación entre dos especies - requiere comparison_rag"
+        "query": "¿Cuáles son las diferencias entre dinosaurios carnívoros y herbívoros?",
+        "descripcion": "Comparación entre tipos de dinosaurios - requiere comparison_rag"
     },
     {
         "numero": 9,
@@ -89,9 +89,9 @@ CASOS_DE_USO = [
     },
     {
         "numero": 10,
-        "categoria": "Cronología",
-        "query": "¿En qué períodos vivieron los dinosaurios?",
-        "descripcion": "Consulta temporal - requiere información general sobre eras geológicas"
+        "categoria": "Resumen",
+        "query": "Resume la información disponible sobre los trilobites",
+        "descripcion": "Resumen de documentos - requiere summary_rag sobre trilobites"
     }
 ]
 

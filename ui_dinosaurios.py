@@ -20,61 +20,61 @@ CASOS_DE_USO = [
         "numero": 1,
         "categoria": "Información General",
         "query": "¿Cuáles fueron los dinosaurios más grandes que existieron?",
-        "descripcion": "Consulta sobre tamaño de dinosaurios"
+        "descripcion": "Consulta sobre tamaño de dinosaurios - debe usar RAG simple"
     },
     {
         "numero": 2,
-        "categoria": "Anatomía",
-        "query": "¿Cómo usaba sus brazos el Tyrannosaurus rex?",
-        "descripcion": "Consulta específica sobre T-Rex"
+        "categoria": "General (sin RAG)",
+        "query": "¡Hola! ¿Cómo estás hoy?",
+        "descripcion": "Saludo general - debe ser clasificado como 'general' y no requerir RAG"
     },
     {
         "numero": 3,
         "categoria": "Evolución",
         "query": "¿Cómo evolucionaron las aves a partir de los dinosaurios?",
-        "descripcion": "Relación evolutiva aves-dinosaurios"
+        "descripcion": "Consulta sobre evolución - puede requerir comparación de documentos"
     },
     {
         "numero": 4,
         "categoria": "Comportamiento",
         "query": "¿Fueron los dinosaurios buenos padres?",
-        "descripcion": "Cuidado parental en dinosaurios"
+        "descripcion": "Consulta sobre comportamiento - documento específico disponible"
     },
     {
         "numero": 5,
-        "categoria": "Comparación",
-        "query": "¿Cuáles son las diferencias entre dinosaurios carnívoros y herbívoros?",
-        "descripcion": "Comparación de tipos de dinosaurios"
+        "categoria": "Extinción",
+        "query": "¿Cómo terminó un asteroide con la era de los dinosaurios?",
+        "descripcion": "Consulta sobre extinción masiva - información histórica"
     },
     {
         "numero": 6,
-        "categoria": "Descubrimientos",
-        "query": "¿Qué pasa cuando encuentras un dinosaurio?",
-        "descripcion": "Proceso de descubrimiento paleontológico"
+        "categoria": "Especies Específicas",
+        "query": "Cuéntame sobre el Spinosaurus y sus habilidades de caza",
+        "descripcion": "Consulta sobre especie específica con comportamiento de caza"
     },
     {
         "numero": 7,
-        "categoria": "Extinción",
-        "query": "¿Cómo afectó la extinción de los dinosaurios a otros animales?",
-        "descripcion": "Impacto de la extinción masiva"
+        "categoria": "Fósiles y Descubrimientos",
+        "query": "¿Qué nos revelan las huellas de dinosaurio?",
+        "descripcion": "Consulta sobre evidencia fósil - paleontología"
     },
     {
         "numero": 8,
-        "categoria": "Defensa",
-        "query": "¿Para qué usaban los Ankylosaurs sus colas con mazas?",
-        "descripcion": "Mecanismos de defensa"
+        "categoria": "Anatomía Comparativa",
+        "query": "¿Cuáles son las diferencias entre dinosaurios carnívoros y herbívoros?",
+        "descripcion": "Comparación entre tipos de dinosaurios - requiere comparison_rag"
     },
     {
         "numero": 9,
-        "categoria": "Ecosistemas",
-        "query": "¿Qué animales convivían con los dinosaurios?",
-        "descripcion": "Fauna del Mesozoico"
+        "categoria": "Paleontología Moderna",
+        "query": "¿Cómo se preparan los fósiles para exhibición en museos?",
+        "descripcion": "Consulta sobre métodos científicos actuales"
     },
     {
         "numero": 10,
         "categoria": "Resumen",
-        "query": "Resume la información disponible sobre trilobites",
-        "descripcion": "Resumen de documentos sobre trilobites"
+        "query": "Resume la información disponible sobre los trilobites",
+        "descripcion": "Resumen de documentos - requiere summary_rag sobre trilobites"
     }
 ]
 
